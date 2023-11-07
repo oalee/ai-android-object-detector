@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("androidx.navigation.safeargs")
+    id("com.google.dagger.hilt.android")
+
 }
 
 android {
@@ -71,6 +73,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
 
+    implementation("com.google.dagger:hilt-android:2.44")
+    annotationProcessor("com.google.dagger:hilt-android-compiler:2.44")
 
 
 }
