@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.delftaiobjectdetector.R;
+import com.example.delftaiobjectdetector.databinding.FragmentHomeBinding;
 
 public class HomeFragment extends Fragment {
 
@@ -33,7 +34,13 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+
+        FragmentHomeBinding binding = FragmentHomeBinding.inflate(
+                inflater, container, false
+        );
+
+
+        return binding.getRoot();
     }
 
 }
