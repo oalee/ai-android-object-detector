@@ -1,8 +1,12 @@
 package com.example.delftaiobjectdetector.core.camera;
 
 import android.content.Context;
+import android.util.Size;
 
+import androidx.camera.core.CameraSelector;
 import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.CameraController;
+import androidx.camera.view.LifecycleCameraController;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -12,28 +16,41 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 
 public class CameraManager {
 
-    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+    private LifecycleCameraController cameraController;
 
     @Inject
     public CameraManager(@ApplicationContext Context context) {
 
-//        log
-        cameraProviderFuture = ProcessCameraProvider.getInstance(context);
-
+        initCameraController(context);
     }
 
-    public ListenableFuture<ProcessCameraProvider> getCameraProviderFuture() {
-        return cameraProviderFuture;
+    public LifecycleCameraController getCameraController() {
+        return cameraController;
     }
 
-    public boolean isCameraAvailable() {
-        try {
-            ProcessCameraProvider camera = cameraProviderFuture.get();
-            return camera != null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    private void initCameraController(Context context){
+        cameraController = new LifecycleCameraController(context);
+
+        cameraController.setCameraSelector(CameraSelector.DEFAULT_BACK_CAMERA);
+
+        cameraController.setImageAnalysisTargetSize(
+                new CameraController.OutputSize(
+                        new Size(
+                                480,
+                                640
+                        )
+                )
+        );
+
+        cameraController.setImageCaptureTargetSize(
+                new CameraController.OutputSize(
+                        new Size(
+                                480,
+                                640
+                        )
+                )
+        );
+
     }
 
 

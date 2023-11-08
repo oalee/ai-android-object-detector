@@ -50,41 +50,18 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
 
     FragmentCameraBinding binding;
     Uri uri;
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
-        mViewModel = new ViewModelProvider(this).get(CameraViewModel.class);
-    }
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         binding = FragmentCameraBinding.inflate(inflater, container, false);
+        mViewModel = new ViewModelProvider(this).get(CameraViewModel.class);
 
 //        setPreview(binding.previewView);
         PreviewView previewView = binding.previewView;
-        LifecycleCameraController cameraController = new LifecycleCameraController(requireContext());
+        LifecycleCameraController cameraController = mViewModel.getCameraController();
         cameraController.bindToLifecycle(this);
-        cameraController.setCameraSelector(CameraSelector.DEFAULT_BACK_CAMERA);
         previewView.setController(cameraController);
-//
-        cameraController.setImageAnalysisTargetSize(
-               new CameraController.OutputSize(
-                        new Size(
-                                480,
-                                640
-                        )
-                )
-        );
-
-        cameraController.setImageCaptureTargetSize(
-                new CameraController.OutputSize(
-                        new Size(
-                                480,
-                                640
-                        )
-                )
-        );
 
 
 
@@ -102,7 +79,7 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
 //                            image is not rotated for some reason
 //                            manually rotate
 
-                            mViewModel.detectObjects(inputImage, CameraFragment.this);
+                            mViewModel.detectObjects(image, CameraFragment.this);
                         }
                         image.close();
                     }
@@ -335,6 +312,8 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
         }
 
         BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, results);
+
+//        run on life scope ui thread
 
 //        TODO remove listner, make live data
         getActivity().runOnUiThread(new Runnable() {

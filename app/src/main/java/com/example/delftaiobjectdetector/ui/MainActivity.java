@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.splashscreen.SplashScreen;
 
 import android.os.Bundle;
 import android.widget.Toast;
@@ -20,6 +21,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+//        installSplashScreen();
+        SplashScreen.installSplashScreen(this);
+
         setContentView(R.layout.activity_main);
 
         handlePermissions();
@@ -41,9 +46,7 @@ public class MainActivity extends AppCompatActivity {
                         allPermissionsGranted = false;
                     }
                     if (!allPermissionsGranted) {
-                        Toast.makeText(this,
-                                "Permission request denied",
-                                Toast.LENGTH_SHORT).show();
+
 
 //                        Request permissions
 
@@ -57,9 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     else{
-                        Toast.makeText(this,
-                                "Permission request accepted",
-                                Toast.LENGTH_SHORT).show();
+
                     }
                 }
         );

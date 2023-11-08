@@ -7,7 +7,6 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import com.google.auto.value.AutoValue;
 
 @Entity(tableName = "detections")
 public class DetectionResult  {

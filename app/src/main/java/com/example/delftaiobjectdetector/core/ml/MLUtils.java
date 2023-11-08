@@ -12,8 +12,13 @@ import android.media.Image;
 import android.net.Uri;
 import android.util.Log;
 
+import androidx.annotation.OptIn;
+import androidx.camera.core.ExperimentalGetImage;
+import androidx.camera.core.ImageProxy;
+
 import com.example.delftaiobjectdetector.core.camera.YuvToRgbConverter;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.utils.BitmapUtils;
 import com.example.delftaiobjectdetector.ml.EfficientdetLite2Detection;
 import com.google.mlkit.vision.common.InputImage;
 
@@ -208,22 +213,23 @@ public class MLUtils {
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
     }
 
-    public void detectObjects(InputImage srcImage, MLTaskListener listener) {
+    @OptIn(markerClass = ExperimentalGetImage.class) public void detectObjects(ImageProxy srcImage, MLTaskListener listener) {
 
 
-        YuvToRgbConverter converter = new YuvToRgbConverter(mContext);
-        Bitmap originalBitmap = Bitmap.createBitmap(
-                srcImage.getWidth(),
-                srcImage.getHeight(),
-                Bitmap.Config.ARGB_8888
-        );
-
-        converter.yuvToRgb(srcImage.getMediaImage(), originalBitmap);
+//        YuvToRgbConverter converter = new YuvToRgbConverter(mContext);
+//        Bitmap originalBitmap = Bitmap.createBitmap(
+//                srcImage.getWidth(),
+//                srcImage.getHeight(),
+//                Bitmap.Config.ARGB_8888
+//        );
+//
+//        converter.yuvToRgb(srcImage.getMediaImage(), originalBitmap);
+        Bitmap originalBitmap = BitmapUtils.getBitmap(srcImage);
 
 //           rotate image
-        int rotation = srcImage.getRotationDegrees();
-
-        originalBitmap = rotateImage(originalBitmap, rotation);
+//        int rotation = srcImage.getImageInfo().getRotationDegrees();
+//
+//        originalBitmap = rotateImage(originalBitmap, rotation);
 
 
         // Store the original dimensions

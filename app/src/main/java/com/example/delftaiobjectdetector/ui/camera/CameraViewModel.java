@@ -2,6 +2,8 @@ package com.example.delftaiobjectdetector.ui.camera;
 
 import android.net.Uri;
 
+import androidx.camera.core.ImageProxy;
+import androidx.camera.view.LifecycleCameraController;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -10,7 +12,6 @@ import com.example.delftaiobjectdetector.core.camera.CameraManager;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.core.data.source.AppRepository;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
-import com.google.mlkit.vision.common.InputImage;
 
 import java.util.List;
 
@@ -41,6 +42,10 @@ public class CameraViewModel extends ViewModel {
 
     }
 
+    public LifecycleCameraController getCameraController() {
+        return cameraManager.getCameraController();
+    }
+
     public void insertResults(DetectionResult[] detectionResults, String imagePath) {
         appRepository.insertResults(detectionResults, imagePath);
     }
@@ -53,8 +58,8 @@ public class CameraViewModel extends ViewModel {
         mlUtils.detectObjects(imageUri, listener);
     }
 
-    public void detectObjects(InputImage image, MLUtils.MLTaskListener listener) {
-        mlUtils.detectObjects(image, new MLUtils.MLTaskListener() {
+    public void detectObjects( ImageProxy imageProxy, MLUtils.MLTaskListener listener) {
+        mlUtils.detectObjects(imageProxy, new MLUtils.MLTaskListener() {
             @Override
             public void onMLTaskCompleted(List<DetectionResult> results) {
 
@@ -72,13 +77,6 @@ public class CameraViewModel extends ViewModel {
 
 
 
-    public boolean isCameraAvailable() {
-        return cameraManager.isCameraAvailable();
-    }
-
-    public CameraManager getCameraManager() {
-        return cameraManager;
-    }
 
     @Override
     protected void onCleared() {
