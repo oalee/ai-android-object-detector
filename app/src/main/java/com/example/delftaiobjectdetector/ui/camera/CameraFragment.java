@@ -3,19 +3,15 @@ package com.example.delftaiobjectdetector.ui.camera;
 import static androidx.navigation.fragment.FragmentKt.findNavController;
 
 import androidx.annotation.OptIn;
-import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
-import androidx.camera.core.Preview;
-import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.CameraController;
 import androidx.camera.view.LifecycleCameraController;
 import androidx.camera.view.PreviewView;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.media.Image;
@@ -35,28 +31,15 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
 import com.example.delftaiobjectdetector.R;
-import com.example.delftaiobjectdetector.core.ml.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
 import com.example.delftaiobjectdetector.databinding.FragmentCameraBinding;
-import com.example.delftaiobjectdetector.ui.analysis.AnalysisViewModel;
 import com.example.delftaiobjectdetector.ui.camera.components.BoundingBoxOverlay;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.mlkit.common.model.LocalModel;
 import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.objects.ObjectDetection;
-import com.google.mlkit.vision.objects.ObjectDetector;
-import com.google.mlkit.vision.objects.custom.CustomObjectDetectorOptions;
-
-import org.tensorflow.lite.DataType;
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.logging.Logger;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -128,13 +111,29 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
 
         binding.saveButton.setOnClickListener(
                 v -> {
+                    String fileName = "temp.jpg";
 
-//                    mViewModel.detectObjects(this.uri, this);
-//                    CameraFragmentDirections.ActionCameraFragmentToAnalysisFragment action =
-//                            CameraFragmentDirections.actionCameraFragmentToAnalysisFragment(
-//                                    this.uri.toString()
-//                            );
-//                    findNavController(this).navigate(action);
+                    File file = new File(requireContext().getFilesDir(), fileName);
+
+                    String newFileName = System.currentTimeMillis() + ".jpg";
+
+                    File newFile = new File(requireContext().getFilesDir(), newFileName);
+
+                    boolean success = file.renameTo(newFile);
+
+                   List<DetectionResult> result =  mViewModel.detectionResults.getValue();
+
+                    if (result != null) {
+
+                        CameraFragmentDirections.ActionCameraFragmentToAnalysisFragment action = CameraFragmentDirections.actionCameraFragmentToAnalysisFragment(newFileName);
+
+                        mViewModel.insertResults(result.toArray(new DetectionResult[0]), newFileName);
+
+                        Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show();
+
+                        findNavController(this).navigate(action);
+                    }
+
                 }
         );
 
@@ -210,7 +209,7 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
                     return;
                 }
 
-                String fileName = System.currentTimeMillis() + ".jpg";
+                String fileName = "temp.jpg";
 
                 File file = new File(requireContext().getFilesDir(), fileName);
 

@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Picture;
 import android.graphics.RectF;
 import android.media.ExifInterface;
 import android.media.Image;
@@ -14,6 +13,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.example.delftaiobjectdetector.core.camera.YuvToRgbConverter;
+import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.ml.EfficientdetLite2Detection;
 import com.google.mlkit.vision.common.InputImage;
 

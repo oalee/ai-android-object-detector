@@ -1,13 +1,18 @@
 package com.example.delftaiobjectdetector.ui.camera;
 
-import android.media.Image;
 import android.net.Uri;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.delftaiobjectdetector.core.camera.CameraManager;
+import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.source.AppRepository;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
 import com.google.mlkit.vision.common.InputImage;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -16,17 +21,28 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class CameraViewModel extends ViewModel {
 
+    private MutableLiveData<List<DetectionResult>> mDetectionResults = new MutableLiveData<>();
+    public
+    LiveData<List<DetectionResult>> detectionResults = mDetectionResults;
+
     private CameraManager cameraManager;
 
     private MLUtils mlUtils;
 
+    private AppRepository appRepository;
+
     @Inject
-    public CameraViewModel(CameraManager cameraManager, MLUtils mlUtils) {
+    public CameraViewModel(CameraManager cameraManager, MLUtils mlUtils, AppRepository appRepository) {
 
         this.cameraManager = cameraManager;
 
+        this.appRepository = appRepository;
         this.mlUtils = mlUtils;
 
+    }
+
+    public void insertResults(DetectionResult[] detectionResults, String imagePath) {
+        appRepository.insertResults(detectionResults, imagePath);
     }
 
     public MLUtils getMlUtils() {
@@ -38,7 +54,20 @@ public class CameraViewModel extends ViewModel {
     }
 
     public void detectObjects(InputImage image, MLUtils.MLTaskListener listener) {
-        mlUtils.detectObjects(image, listener);
+        mlUtils.detectObjects(image, new MLUtils.MLTaskListener() {
+            @Override
+            public void onMLTaskCompleted(List<DetectionResult> results) {
+
+                mDetectionResults.postValue(results);
+                listener.onMLTaskCompleted(results);
+            }
+
+            @Override
+            public void onMLTaskFailed() {
+
+            }
+
+        });
     }
 
 

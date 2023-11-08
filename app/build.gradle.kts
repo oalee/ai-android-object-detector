@@ -90,6 +90,13 @@ dependencies {
 
     implementation("com.google.mlkit:object-detection-custom:17.0.1")
 
+    val room_version = "2.6.0"
 
+    implementation("androidx.room:room-runtime:$room_version")
+    annotationProcessor("androidx.room:room-compiler:$room_version")
 
+    val auto_value_version = "1.7.5"
+    implementation("com.google.auto.value:auto-value:$auto_value_version")
+    annotationProcessor("com.google.auto.value:auto-value:$auto_value_version")
+    implementation("com.google.auto.value:auto-value-annotations:$auto_value_version")
 }

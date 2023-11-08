@@ -8,7 +8,7 @@ import android.graphics.PathEffect;
 import android.graphics.RectF;
 import android.util.Log;
 
-import com.example.delftaiobjectdetector.core.ml.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 
 import java.util.List;
 
