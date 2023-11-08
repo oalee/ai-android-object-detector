@@ -336,6 +336,7 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
 
         BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, results);
 
+//        TODO remove listner, make live data
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

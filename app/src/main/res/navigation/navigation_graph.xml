@@ -31,8 +31,10 @@
         android:id="@+id/analysisFragment"
         android:name="com.example.delftaiobjectdetector.ui.analysis.AnalysisFragment"
         android:label="fragment_analysis"
-        tools:layout="@layout/fragment_analysis" />
-    <argument
-        android:name="imageUri"
-        app:argType="java.lang.String" />
+        tools:layout="@layout/fragment_analysis" >
+
+        <argument
+            android:name="imageUri"
+            app:argType="java.lang.String" />
+    </fragment>
 </navigation>

@@ -8,11 +8,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.delftaiobjectdetector.R;
+import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.databinding.ItemDetectedBinding;
 
-public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdapter.ViewHolder>{
+import java.util.List;
 
-    public DetectedItemsAdapter() {
+public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdapter.ViewHolder> {
+
+    private
+    List<DetectionResult> detectionResults;
+
+    public DetectedItemsAdapter(List<DetectionResult> detectionResults) {
+
+        this.detectionResults = detectionResults;
+
     }
 
     @NonNull
@@ -27,20 +36,41 @@ public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdap
     @Override
     public void onBindViewHolder(@NonNull DetectedItemsAdapter.ViewHolder holder, int position) {
 
+        DetectionResult detectionResult = detectionResults.get(position);
+        holder.setDetectionResult(detectionResult);
     }
 
     @Override
     public int getItemCount() {
-        return 6;
+        return  detectionResults.size();
     }
 
-    public class ViewHolder  extends RecyclerView.ViewHolder {
-        ItemDetectedBinding binding;
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public ItemDetectedBinding binding;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             binding = ItemDetectedBinding.bind(itemView);
         }
 
+        public ItemDetectedBinding getBinding() {
+            return binding;
+        }
 
+
+        public void setDetectionResult(DetectionResult detectionResult) {
+
+            String category = detectionResult.getCategoryAsString();
+//            capitalize first letter
+            category = category.substring(0, 1).toUpperCase() + category.substring(1);
+
+            float confidence = detectionResult.getScoreAsFloat();
+
+//            join category and confidence, e.g. "Person (0.99)"
+            String name = category + " Confidence: " + confidence + "%";
+
+            binding.detectedItemTextView.setText( name);
+//            binding.de.setText(String.valueOf(detectionResult.getConfidence()));
+        }
     }
 }

@@ -12,18 +12,18 @@ import java.util.List;
 @Dao
 public interface AppDao {
     @Query("SELECT * FROM detections")
-    List<DetectionResult> getAll();
+    List<DetectionResult>  getAll();
 
     @Query("SELECT * FROM detections WHERE id = :id")
-    DetectionResult getById(int id);
+    DetectionResult  getById(int id);
 
     @Query("SELECT * FROM detections WHERE image_path = :imagePath")
-    DetectionResult getByImagePath(String imagePath);
+    List<DetectionResult> getByImagePath(String imagePath);
 
 //    unique image paths
 
     @Query("SELECT DISTINCT image_path FROM detections")
-    String[] getImages();
+    List<String> getImages();
 
 //    insert
     @Insert

@@ -80,8 +80,7 @@ dependencies {
     implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
     // Testing Navigation
     androidTestImplementation("androidx.navigation:navigation-testing:$nav_version")
-    // Jetpack Compose Integration
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+
 
 
     implementation("com.google.dagger:hilt-android:2.44")

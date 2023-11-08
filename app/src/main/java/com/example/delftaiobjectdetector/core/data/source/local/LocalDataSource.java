@@ -18,11 +18,11 @@ public class LocalDataSource {
         this.appDatabase = database;
     }
 
-    public String[] getImages() {
+    public List<String> getImages() {
         return appDatabase.appDao().getImages();
     }
 
-    public DetectionResult getByImagePath(String imagePath) {
+    public List<DetectionResult> getByImagePath(String imagePath) {
         return appDatabase.appDao().getByImagePath(imagePath);
     }
 

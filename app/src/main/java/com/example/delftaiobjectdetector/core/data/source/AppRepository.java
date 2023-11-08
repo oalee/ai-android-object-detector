@@ -18,11 +18,12 @@ public class AppRepository {
         this.localDataSource = localDataSource;
     }
 
-    public String[] getImages() {
+    public List<String> getImages() {
         return localDataSource.getImages();
     }
 
-    public DetectionResult getByImagePath(String imagePath) {
+    public List<DetectionResult> getByImagePath(String imagePath) {
+
         return localDataSource.getByImagePath(imagePath);
     }
 
