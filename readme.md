@@ -2,8 +2,7 @@
 
 This is a simple Android app that uses the TensorFlow Object Detection API and a pre-trained model to detect objects in real time. 
 
-### Built Status
-![Gradle Build](https://github.com/oalee/ai-android-object-detector/actions/workflows/main.yml/badge.svg)
+![CI Build Status](https://github.com/oalee/ai-android-object-detector/actions/workflows/gradle-publish.yml/badge.svg)
 
 ### Requirements
 - JDK 17
