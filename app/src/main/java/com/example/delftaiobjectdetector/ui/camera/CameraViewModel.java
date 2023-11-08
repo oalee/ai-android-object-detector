@@ -1,8 +1,11 @@
 package com.example.delftaiobjectdetector.ui.camera;
 
+import android.net.Uri;
+
 import androidx.lifecycle.ViewModel;
 
 import com.example.delftaiobjectdetector.core.camera.CameraManager;
+import com.example.delftaiobjectdetector.core.ml.MLUtils;
 
 import javax.inject.Inject;
 
@@ -13,12 +16,23 @@ public class CameraViewModel extends ViewModel {
 
     private CameraManager cameraManager;
 
+    private MLUtils mlUtils;
+
     @Inject
-    public CameraViewModel(CameraManager cameraManager) {
+    public CameraViewModel(CameraManager cameraManager, MLUtils mlUtils) {
 
         this.cameraManager = cameraManager;
 
+        this.mlUtils = mlUtils;
 
+    }
+
+    public MLUtils getMlUtils() {
+        return mlUtils;
+    }
+
+    public void detectObjects(Uri imageUri){
+        mlUtils.detectObjects(imageUri);
     }
 
     public boolean isCameraAvailable() {
@@ -27,5 +41,10 @@ public class CameraViewModel extends ViewModel {
 
     public CameraManager getCameraManager() {
         return cameraManager;
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
     }
 }
