@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_graph"
     app:startDestination="@id/homeFragment">
 
@@ -17,5 +18,21 @@
     <fragment
         android:id="@+id/cameraFragment"
         android:name="com.example.delftaiobjectdetector.ui.camera.CameraFragment"
-        android:label="CameraFragment" />
+        android:label="CameraFragment" >
+        <action
+            android:id="@+id/action_cameraFragment_to_analysisFragment"
+            app:destination="@id/analysisFragment" >
+            <argument
+                android:name="imageUri"
+                app:argType="java.lang.String" />
+        </action>
+    </fragment>
+    <fragment
+        android:id="@+id/analysisFragment"
+        android:name="com.example.delftaiobjectdetector.ui.analysis.AnalysisFragment"
+        android:label="fragment_analysis"
+        tools:layout="@layout/fragment_analysis" />
+    <argument
+        android:name="imageUri"
+        app:argType="java.lang.String" />
 </navigation>

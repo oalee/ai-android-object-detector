@@ -20,7 +20,6 @@ public class CameraManager {
 //        log
         cameraProviderFuture = ProcessCameraProvider.getInstance(context);
 
-
     }
 
     public ListenableFuture<ProcessCameraProvider> getCameraProviderFuture() {
@@ -36,4 +35,6 @@ public class CameraManager {
             return false;
         }
     }
+
+
 }
