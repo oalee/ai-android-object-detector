@@ -49,8 +49,8 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
 
                 RectF rect = detection.getBoundingBox();
 
-                int originalWidth = 1080 ;
-                int originalHeight = 1080;
+                int originalWidth = 480 ;
+                int originalHeight = 640;
 
 
 

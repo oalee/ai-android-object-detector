@@ -82,12 +82,12 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
         cameraController.bindToLifecycle(this);
         cameraController.setCameraSelector(CameraSelector.DEFAULT_BACK_CAMERA);
         previewView.setController(cameraController);
-
+//
         cameraController.setImageAnalysisTargetSize(
                new CameraController.OutputSize(
                         new Size(
                                 480,
-                                480
+                                640
                         )
                 )
         );
@@ -96,7 +96,7 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
                 new CameraController.OutputSize(
                         new Size(
                                 480,
-                                480
+                                640
                         )
                 )
         );
@@ -165,6 +165,8 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
                             public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                                 Log.d("CameraFragment", "onImageSaved: " + file.getAbsolutePath());
 
+
+
                               Uri uri=  outputFileResults.getSavedUri();
 
                                 Log.d("CameraFragment", "onImageSaved: " + uri);
@@ -172,6 +174,10 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
 
                                     @Override
                                     public void run() {
+
+//                                stop camera
+                                        cameraController.unbind();
+
                                         CameraFragment.this.uri = uri;
 
                                         binding.capturedImageView.setImageURI(uri);
