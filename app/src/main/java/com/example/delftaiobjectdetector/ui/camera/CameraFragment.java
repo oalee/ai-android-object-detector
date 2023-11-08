@@ -31,8 +31,10 @@ import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
+import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.core.ml.DetectionResult;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
 import com.example.delftaiobjectdetector.databinding.FragmentCameraBinding;
@@ -101,11 +103,6 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
                 )
         );
 
-//        analyzer mode stream
-//        cameraController.setImageCaptureMode(
-//                ImageCapture.Cap
-//        );
-
 
 
 
@@ -129,10 +126,10 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
                 }
         );
 
-        binding.analyzeButton.setOnClickListener(
+        binding.saveButton.setOnClickListener(
                 v -> {
 
-                    mViewModel.detectObjects(this.uri, this);
+//                    mViewModel.detectObjects(this.uri, this);
 //                    CameraFragmentDirections.ActionCameraFragmentToAnalysisFragment action =
 //                            CameraFragmentDirections.actionCameraFragmentToAnalysisFragment(
 //                                    this.uri.toString()
@@ -146,6 +143,72 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
             public void onClick(View v) {
 
 //                get time stamp for file name, time millis
+                if (CameraFragment.this.uri != null) {
+
+//                    animate previewView to appear
+                    binding.previewView.setVisibility(View.VISIBLE);
+                    binding.previewView.animate()
+                            .alpha(1)
+                            .setDuration(500) // duration of the fade-out effect
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Set the view to GONE after the fade-out
+
+                                }
+                            })
+                            .start();
+
+
+                    binding.captureButton.animate()
+
+                            .rotationBy(360)
+                            .setInterpolator(new LinearInterpolator())
+                            .setDuration(500) // duration of the fade-out effect
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Change the image resource after the fade-out
+                                    binding.captureButton.setImageResource(R.drawable.baseline_camera_24);
+                                    // Start fade-in effect after the image resource has been changed
+                                    binding.captureButton.animate()
+                                            .alpha(1f)
+                                            .setDuration(200)
+                                            .start();
+                                }
+                            })
+                            .start();
+
+                   // binding.capturedImageView.setVisibility(View.GONE);
+                    cameraController.bindToLifecycle(CameraFragment.this);
+                    CameraFragment.this.uri = null;
+                    binding.capturedImageView.animate()
+                            .alpha(0f)
+
+                            .setDuration(200) // duration of the fade-out effect
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Set the view to GONE after the fade-out
+                                    binding.capturedImageView.setVisibility(View.GONE);
+                                }
+                            })
+                            .start();
+                    binding.saveButton.animate()
+                            .alpha(0f)
+                            .setDuration(200) // duration of the fade-out effect
+                            .withEndAction(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Set the view to GONE after the fade-out
+                                    binding.saveButton.setVisibility(View.GONE);
+                                }
+                            })
+                            .start();
+
+
+                    return;
+                }
 
                 String fileName = System.currentTimeMillis() + ".jpg";
 
@@ -180,8 +243,36 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
 
                                         CameraFragment.this.uri = uri;
 
+                                        // Fade out the captureButton
+                                        binding.captureButton.animate()
+                                                .rotationBy(360)
+                                                .setInterpolator(new LinearInterpolator())
+                                                .setDuration(500) // duration of the fade-out effect
+                                                .withEndAction(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        // Change the image resource after the fade-out
+                                                        binding.captureButton.setImageResource(R.drawable.baseline_autorenew_24);
+                                                        // Fade in the captureButton with the new image
+                                                        binding.captureButton.animate()
+                                                                .alpha(1f)
+                                                                .setDuration(200)
+                                                                .start();
+                                                    }
+                                                })
+                                                .start();
                                         binding.capturedImageView.setImageURI(uri);
                                         binding.capturedImageView.setVisibility(View.VISIBLE);
+                                        // Set the saveButton to be invisible and fully transparent
+                                        binding.saveButton.setAlpha(0f);
+                                        binding.saveButton.setVisibility(View.VISIBLE);
+
+// Fade in the saveButton
+                                        binding.saveButton.animate()
+                                                .alpha(1f)
+                                                .setDuration(500) // duration of the fade-in effect
+                                                .start();
+
                                     }
                                 });
 

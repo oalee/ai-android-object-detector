@@ -46,11 +46,12 @@
         app:layout_constraintEnd_toEndOf="@id/previewView"
         />
 
-    <Button
+    <ImageButton
         android:id="@+id/captureButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Capture"
+        android:src="@drawable/baseline_camera_24"
+        android:background="#00000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -58,21 +59,13 @@
         app:layout_constraintTop_toBottomOf="@+id/previewView"
         app:layout_constraintVertical_bias="0.1" />
 
-    <Button
-        android:id="@+id/switchCameraButton"
+    <ImageButton
+        android:id="@+id/saveButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Switch Camera"
-        app:layout_constraintEnd_toStartOf="@+id/captureButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/captureButton" />
-
-    <Button
-        android:id="@+id/analyzeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Analyze"
+        android:background="#00000000"
+        android:src="@drawable/baseline_save_24"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/captureButton"
