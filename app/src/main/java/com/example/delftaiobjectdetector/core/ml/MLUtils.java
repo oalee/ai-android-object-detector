@@ -3,19 +3,28 @@ package com.example.delftaiobjectdetector.core.ml;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Picture;
+import android.graphics.RectF;
+import android.media.ExifInterface;
+import android.media.Image;
 import android.net.Uri;
 import android.util.Log;
 
+import com.example.delftaiobjectdetector.core.camera.YuvToRgbConverter;
 import com.example.delftaiobjectdetector.ml.EfficientdetLite2Detection;
+import com.google.mlkit.vision.common.InputImage;
 
-import org.tensorflow.lite.DataType;
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer;
+import org.tensorflow.lite.support.image.TensorImage;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -43,86 +52,269 @@ public class MLUtils {
         return model;
     }
 
-//    detect objects in image
-    public void detectObjects(Uri imageUri) {
+    private Bitmap padBitmapToSize(Bitmap bitmap, int width, int height) {
+        Bitmap paddedBitmap = Bitmap.createBitmap(width, height, bitmap.getConfig());
+        Canvas canvas = new Canvas(paddedBitmap);
+        canvas.drawColor(Color.BLACK); // Use a neutral color for padding
+        canvas.drawBitmap(bitmap, (width - bitmap.getWidth()) / 2f, (height - bitmap.getHeight()) / 2f, null);
+        return paddedBitmap;
+    }
+
+    public static Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(),
+                matrix, true);
+    }
+
+    //    detect objects in image
+    public void detectObjects(Uri imageUri, MLTaskListener listener) {
 
 
+        //    read Image, downscale to 448x448, convert to RGB, convert to bytebuffer
 
-    //    read Image, downscale to 448x448, convert to RGB, convert to bytebuffer
-
+        int orientation = -1;
 
         InputStream imageStream = null;
         try {
             imageStream = this.mContext.getContentResolver().openInputStream(imageUri);
+
+            ExifInterface ei = new ExifInterface(imageUri.getPath());
+            orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_UNDEFINED);
         } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         Bitmap originalBitmap = BitmapFactory.decodeStream(imageStream);
 
+        switch (orientation) {
+
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                originalBitmap = rotateImage(originalBitmap, 90);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                originalBitmap = rotateImage(originalBitmap, 180);
+                break;
+
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                originalBitmap = rotateImage(originalBitmap, 270);
+                break;
+
+            case ExifInterface.ORIENTATION_NORMAL:
+            default:
+                originalBitmap = originalBitmap;
+        }
+
+
+        // Store the original dimensions
+        int originalWidth = originalBitmap.getWidth();
+        int originalHeight = originalBitmap.getHeight();
+
+//        log this
+        Log.d("MLUtils", "detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
 
         // Calculate the new dimensions
         int newWidth = 448;
         int newHeight = 448;
 
-        // Downscale the image maintaining the aspect ratio
-        Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, true);
-        // Ensure the bitmap is in the correct format (ARGB_8888)
-        Bitmap rgbBitmap = scaledBitmap.copy(Bitmap.Config.ARGB_8888, true);
+        // Calculate the scaling factor to maintain the aspect ratio
+        float scaleFactor = Math.max((float) originalWidth / newWidth, (float) originalHeight / newHeight);
+        int scaledWidth = (int) (originalWidth / scaleFactor);
+        int scaledHeight = (int) (originalHeight / scaleFactor);
 
-        // Prepare the ByteBuffer
-        int bufferSize = newWidth * newHeight * 3; // 3 bytes per pixel for RGB
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(bufferSize);
+// Downscale the image maintaining the aspect ratio
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, scaledWidth, scaledHeight, true);
 
-        // Extract RGB values and put them into the ByteBuffer
-        for (int y = 0; y < newHeight; y++) {
-            for (int x = 0; x < newWidth; x++) {
-                int pixel = rgbBitmap.getPixel(x, y);
-                byteBuffer.put((byte) ((pixel >> 16) & 0xFF)); // Red
-                byteBuffer.put((byte) ((pixel >> 8) & 0xFF));  // Green
-                byteBuffer.put((byte) (pixel & 0xFF));         // Blue
-            }
-        }
-        byteBuffer.rewind(); // Rewind the buffer to the beginning before loading into TensorBuffer
+// If necessary, pad the image to the required input size (448x448)
+        Bitmap paddedBitmap = padBitmapToSize(scaledBitmap, 448, 448);
 
-        TensorBuffer inputFeature = TensorBuffer.createFixedSize(new int[]{1, newWidth, newHeight, 3}, DataType.UINT8);
-        inputFeature.loadBuffer(byteBuffer);
+// Use the padded bitmap for detection
+        TensorImage image = TensorImage.fromBitmap(paddedBitmap);
 
         // Runs model inference and gets result.
-        EfficientdetLite2Detection.Outputs outputs = model.process(inputFeature);
+        EfficientdetLite2Detection.Outputs outputs = model.process(
+                image
+        );
 
 
+        List<EfficientdetLite2Detection.DetectionResult> results = outputs.getDetectionResultList();
 
-        TensorBuffer outputBoxes = outputs.getOutputFeature0AsTensorBuffer();
-        TensorBuffer outputClasses = outputs.getOutputFeature1AsTensorBuffer();
-        TensorBuffer outputScores = outputs.getOutputFeature2AsTensorBuffer();
-        TensorBuffer outputNumDetections = outputs.getOutputFeature3AsTensorBuffer();
+//        for (EfficientdetLite2Detection.DetectionResult result : results) {
+//            Log.d("MLUtils", "detectObjects: " + result.getCategoryAsString() + " " + result.getScoreAsFloat());
+//        }
 
-// Typically, these buffers are in float format
-        float[] boxes = outputBoxes.getFloatArray();
-        float[] classes = outputClasses.getFloatArray();
-        float[] scores = outputScores.getFloatArray();
-        float[] numDetections = outputNumDetections.getFloatArray();
+        List<DetectionResult> scaledResults = new ArrayList<>();
+        float offsetX = (448 - scaledWidth) / 2f;
+        float offsetY = (448 - scaledHeight) / 2f;
 
-// The exact number of detections: you might need to cast from float to int
-        int numberOfDetections = (int) numDetections[0];
+        Log.d(
+                "MLUtils",
+                String.format(
+                        "Scaled Image Size: %d x %d, Offset: %f x %f",
+                        scaledWidth,
+                        scaledHeight,
+                        offsetX,
+                        offsetY
+                )
+        );
 
-// Iterate over the detections
-        for (int i = 0; i < numberOfDetections; i++) {
-            // Each box is typically represented by 4 values: [ymin, xmin, ymax, xmax]
-            float ymin = boxes[4 * i];
-            float xmin = boxes[4 * i + 1];
-            float ymax = boxes[4 * i + 2];
-            float xmax = boxes[4 * i + 3];
+        for (EfficientdetLite2Detection.DetectionResult result : results) {
+            RectF boundingBox = result.getLocationAsRectF();
 
-            // The class index for the detected object
-            int classIndex = (int) classes[i];
+            // Remove padding and rescale bounding box
+            boundingBox.left = (boundingBox.left - offsetX) * scaleFactor;
+            boundingBox.top = (boundingBox.top - offsetY) * scaleFactor;
+            boundingBox.right = (boundingBox.right - offsetX) * scaleFactor;
+            boundingBox.bottom = (boundingBox.bottom - offsetY) * scaleFactor;
 
-            // The confidence score for the detection
-            float score = scores[i];
+            // Ensure the bounding box does not go beyond the image boundaries
+            boundingBox.left = Math.max(boundingBox.left, 0);
+            boundingBox.top = Math.max(boundingBox.top, 0);
+            boundingBox.right = Math.min(boundingBox.right, originalWidth);
+            boundingBox.bottom = Math.min(boundingBox.bottom, originalHeight);
 
-            // Log or process the detection information
-            Log.d("MLUtils", "Detection " + i + ": Class " + classIndex + ", Score " + score + ", Box [" + ymin + ", " + xmin + ", " + ymax + ", " + xmax + "]");
+            // Log the category, score, and bounding box
+            Log.d("MLUtils", String.format("Category: %s, Score: %.2f, Box: [%f, %f, %f, %f]",
+                    result.getCategoryAsString(),
+                    result.getScoreAsFloat(),
+                    boundingBox.left,
+                    boundingBox.top,
+                    boundingBox.right,
+                    boundingBox.bottom));
+
+            // You might need to create a new result object if the DetectionResult class is immutable
+            // or otherwise update the bounding box in the existing result object.
+            scaledResults.add(new DetectionResult(
+                    result.getCategoryAsString(),
+                    boundingBox,
+                    result.getScoreAsFloat()
+            ));
+
         }
+        if (listener != null) {
+            listener.onMLTaskCompleted(scaledResults);
+        }
+
+//        this.model.close();
+    }
+
+    public Bitmap ToBitmap(Image image) {
+        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+        byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
+    }
+
+    public void detectObjects(InputImage srcImage, MLTaskListener listener) {
+
+
+        YuvToRgbConverter converter = new YuvToRgbConverter(mContext);
+        Bitmap originalBitmap = Bitmap.createBitmap(
+                srcImage.getWidth(),
+                srcImage.getHeight(),
+                Bitmap.Config.ARGB_8888
+        );
+
+        converter.yuvToRgb(srcImage.getMediaImage(), originalBitmap);
+
+//           rotate image
+        int rotation = srcImage.getRotationDegrees();
+
+        originalBitmap = rotateImage(originalBitmap, rotation);
+
+
+        // Store the original dimensions
+        int originalWidth = originalBitmap.getWidth();
+        int originalHeight = originalBitmap.getHeight();
+
+//        log this
+        Log.d("MLUtils", "detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
+
+        // Calculate the new dimensions
+        int newWidth = 448;
+        int newHeight = 448;
+
+        // Calculate the scaling factor to maintain the aspect ratio
+        float scaleFactor = Math.max((float) originalWidth / newWidth, (float) originalHeight / newHeight);
+        int scaledWidth = (int) (originalWidth / scaleFactor);
+        int scaledHeight = (int) (originalHeight / scaleFactor);
+
+// Downscale the image maintaining the aspect ratio
+        Bitmap scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, scaledWidth, scaledHeight, true);
+
+// If necessary, pad the image to the required input size (448x448)
+        Bitmap paddedBitmap = padBitmapToSize(scaledBitmap, 448, 448);
+
+// Use the padded bitmap for detection
+        TensorImage image = TensorImage.fromBitmap(paddedBitmap);
+
+        // Runs model inference and gets result.
+        EfficientdetLite2Detection.Outputs outputs = model.process(
+                image
+        );
+
+
+        List<EfficientdetLite2Detection.DetectionResult> results = outputs.getDetectionResultList();
+
+//        for (EfficientdetLite2Detection.DetectionResult result : results) {
+//            Log.d("MLUtils", "detectObjects: " + result.getCategoryAsString() + " " + result.getScoreAsFloat());
+//        }
+
+        List<DetectionResult> scaledResults = new ArrayList<>();
+        float offsetX = (448 - scaledWidth) / 2f;
+        float offsetY = (448 - scaledHeight) / 2f;
+
+        Log.d(
+                "MLUtils",
+                String.format(
+                        "Scaled Image Size: %d x %d, Offset: %f x %f",
+                        scaledWidth,
+                        scaledHeight,
+                        offsetX,
+                        offsetY
+                )
+        );
+
+        for (EfficientdetLite2Detection.DetectionResult result : results) {
+            RectF boundingBox = result.getLocationAsRectF();
+
+            // Remove padding and rescale bounding box
+            boundingBox.left = (boundingBox.left - offsetX) * scaleFactor;
+            boundingBox.top = (boundingBox.top - offsetY) * scaleFactor;
+            boundingBox.right = (boundingBox.right - offsetX) * scaleFactor;
+            boundingBox.bottom = (boundingBox.bottom - offsetY) * scaleFactor;
+
+            // Ensure the bounding box does not go beyond the image boundaries
+            boundingBox.left = Math.max(boundingBox.left, 0);
+            boundingBox.top = Math.max(boundingBox.top, 0);
+            boundingBox.right = Math.min(boundingBox.right, originalWidth);
+            boundingBox.bottom = Math.min(boundingBox.bottom, originalHeight);
+
+            // Log the category, score, and bounding box
+            Log.d("MLUtils", String.format("Category: %s, Score: %.2f, Box: [%f, %f, %f, %f]",
+                    result.getCategoryAsString(),
+                    result.getScoreAsFloat(),
+                    boundingBox.left,
+                    boundingBox.top,
+                    boundingBox.right,
+                    boundingBox.bottom));
+
+            // You might need to create a new result object if the DetectionResult class is immutable
+            // or otherwise update the bounding box in the existing result object.
+            scaledResults.add(new DetectionResult(
+                    result.getCategoryAsString(),
+                    boundingBox,
+                    result.getScoreAsFloat()
+            ));
+
+        }
+        if (listener != null) {
+            listener.onMLTaskCompleted(scaledResults);
+        }
+
 //        this.model.close();
     }
 
@@ -132,7 +324,8 @@ public class MLUtils {
 
 
     public interface MLTaskListener {
-        void onMLTaskCompleted();
+        void onMLTaskCompleted(List<DetectionResult> results);
+
         void onMLTaskFailed();
     }
 }
