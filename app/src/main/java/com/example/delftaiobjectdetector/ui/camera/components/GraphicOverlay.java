@@ -12,7 +12,7 @@ public class GraphicOverlay extends View {
     private final Object lock = new Object();
     private final List<Graphic> graphics = new ArrayList<>();
 
-    public float parentRotation = 0;
+    public float parentRotation = 90;
 
 
 

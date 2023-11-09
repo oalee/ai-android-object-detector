@@ -6,6 +6,7 @@ import android.content.Context;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.util.Log;
+import android.util.Size;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -15,6 +16,7 @@ import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
+import androidx.camera.view.CameraController;
 import androidx.camera.view.LifecycleCameraController;
 import androidx.camera.view.PreviewView;
 import androidx.lifecycle.LifecycleOwner;
@@ -105,6 +107,23 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
                     mRotationDegrees.postValue(rotationDegrees);
                     image.close();
                 }
+        );
+        cameraController.setImageAnalysisTargetSize(
+                new CameraController.OutputSize(
+                        new Size(
+                                480,
+                                640
+                        )
+                )
+        );
+
+        cameraController.setImageCaptureTargetSize(
+                new CameraController.OutputSize(
+                        new Size(
+                                480,
+                                640
+                        )
+                )
         );
     }
 
