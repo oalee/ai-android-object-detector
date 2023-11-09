@@ -45,7 +45,7 @@ public class LocalDataSource {
         appDatabase.appDao().deleteById(id);
     }
 
-    public void insertAll(DetectionResult[] detectionResults, String imagePath) {
+    public void insertAll(List<DetectionResult> detectionResults, String imagePath) {
 
         for (DetectionResult detectionResult : detectionResults) {
             detectionResult.setImageName(imagePath);

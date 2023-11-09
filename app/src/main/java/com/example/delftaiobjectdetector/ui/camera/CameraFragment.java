@@ -45,12 +45,25 @@ import java.util.concurrent.Executors;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
+public class CameraFragment extends Fragment {
 
     CameraViewModel mViewModel;
 
     FragmentCameraBinding binding;
-    Uri uri;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+//        if state is not Captured, bind camera
+        if (mViewModel.cameraState.getValue() == CameraState.CAPTURED) {
+          mViewModel.restartCamera(this);
+        }
+//        log state
+        Log.d("CameraFragment", "onResume: " + mViewModel.cameraState.getValue());
+
+        binding.overlay.clear();
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -58,46 +71,59 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
         binding = FragmentCameraBinding.inflate(inflater, container, false);
         mViewModel = new ViewModelProvider(this).get(CameraViewModel.class);
 
-//        setPreview(binding.previewView);
-        PreviewView previewView = binding.previewView;
-        LifecycleCameraController cameraController = mViewModel.getCameraController();
-        cameraController.bindToLifecycle(this);
-        previewView.setController(cameraController);
+        mViewModel.bindCamera(this, binding.previewView);
 
         SizeManager sizeManager = mViewModel.getSizeManager();
-
         sizeManager.setCameraHeightPortraitPreview(binding.previewView);
-        sizeManager.setViewWidthAndHeight(binding.captureButton, (int) (sizeManager.getWidth() *0.15f));
-        sizeManager.setViewWidthAndHeight(binding.saveButton, (int) (sizeManager.getWidth() *0.13f));
-        sizeManager.setViewWidthAndHeight(binding.galleryButton, (int) (sizeManager.getWidth() *0.13f));
+        sizeManager.setCameraHeightPortraitPreview(binding.capturedImageView);
+        sizeManager.setViewWidthAndHeight(binding.captureButton, (int) (sizeManager.getWidth() * 0.15f));
+        sizeManager.setViewWidthAndHeight(binding.saveButton, (int) (sizeManager.getWidth() * 0.13f));
+        sizeManager.setViewWidthAndHeight(binding.galleryButton, (int) (sizeManager.getWidth() * 0.13f));
 
+        mViewModel.cameraState.observe(
+                getViewLifecycleOwner(),
+                cameraState -> {
+                    Log.d("CameraFragment", "onCreateView: " + cameraState);
+                    if (cameraState == CameraState.STREAMING) {
 
-        cameraController.setImageAnalysisAnalyzer(
-                Executors.newSingleThreadExecutor(),
-                new ImageAnalysis.Analyzer() {
-                    @OptIn(markerClass = ExperimentalGetImage.class) @Override
-                    public void analyze(@NonNull ImageProxy image) {
-                        Log.d("CameraFragment", "analyze: test");
-                        Image mediaImage = image.getImage();
-                        if (mediaImage != null) {
-                            InputImage inputImage =
-                                    InputImage.fromMediaImage(mediaImage, image.getImageInfo().getRotationDegrees());
-//                            image is not rotated for some reason
-//                            manually rotate
-
-                            mViewModel.detectObjects(image, CameraFragment.this);
-                        }
-                        image.close();
+                        binding.previewView.setVisibility(View.VISIBLE);
+                    } else
+                    if (cameraState == CameraState.CAPTURING) {
+                        animateCapturing();
+                    } else if (cameraState == CameraState.RESTARTING) {
+                        animateRestarting();
                     }
+                    else if (cameraState == CameraState.CAPTURED){
+//                        mViewModel.unbindCamera();
+                        binding.previewView.setVisibility(View.INVISIBLE);
+
+                        File file = new File(requireContext().getFilesDir(), "temp.jpg");
+                        binding.capturedImageView.setImageURI(null);
+                        binding.capturedImageView.setImageURI(Uri.fromFile(file));
+                        binding.capturedImageView.setVisibility(View.VISIBLE);
+                        binding.capturedImageView.setAlpha(1f);
+
+
+                    }
+                }
+        );
+
+        mViewModel.detectionResults.observe(
+                getViewLifecycleOwner(),
+                detectionResults -> {
+                    displayOverlay(detectionResults);
                 }
         );
 
         binding.saveButton.setOnClickListener(
                 v -> {
 
-                    if (CameraFragment.this.uri == null) {
+//                    only save when state is captured
+                    if (mViewModel.cameraState.getValue() != CameraState.CAPTURED) {
                         return;
                     }
+
+
                     String fileName = "temp.jpg";
 
                     File file = new File(requireContext().getFilesDir(), fileName);
@@ -108,236 +134,158 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
 
                     boolean success = file.renameTo(newFile);
 
-                   List<DetectionResult> result =  mViewModel.detectionResults.getValue();
+                    List<DetectionResult> result = mViewModel.detectionResults.getValue();
 
                     if (result != null) {
 
                         CameraFragmentDirections.ActionCameraFragmentToAnalysisFragment action = CameraFragmentDirections.actionCameraFragmentToAnalysisFragment(newFileName);
-
-                        mViewModel.insertResults(result.toArray(new DetectionResult[0]), newFileName);
-
+                        mViewModel.insertResults(result, newFileName);
                         Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show();
-
                         findNavController(this).navigate(action);
                     }
 
                 }
         );
 
-        binding.captureButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        binding.captureButton.setOnClickListener(v -> {
 
-//                get time stamp for file name, time millis
-                if (CameraFragment.this.uri != null) {
-
-//                    animate previewView to appear
-                    binding.previewView.setVisibility(View.VISIBLE);
-                    binding.previewView.animate()
-                            .alpha(1)
-                            .setDuration(500) // duration of the fade-out effect
-                            .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Set the view to GONE after the fade-out
-
-                                }
-                            })
-                            .start();
-
-
-                    binding.captureButton.animate()
-
-                            .rotationBy(360)
-                            .setInterpolator(new LinearInterpolator())
-                            .setDuration(500) // duration of the fade-out effect
-                            .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Change the image resource after the fade-out
-                                    binding.captureButton.setImageResource(R.drawable.baseline_camera_24);
-                                    // Start fade-in effect after the image resource has been changed
-                                    binding.captureButton.animate()
-                                            .alpha(1f)
-                                            .setDuration(200)
-                                            .start();
-                                }
-                            })
-                            .start();
-
-                   // binding.capturedImageView.setVisibility(View.GONE);
-                    cameraController.bindToLifecycle(CameraFragment.this);
-                    CameraFragment.this.uri = null;
-                    binding.capturedImageView.animate()
-                            .alpha(0f)
-
-                            .setDuration(200) // duration of the fade-out effect
-                            .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Set the view to GONE after the fade-out
-                                    binding.capturedImageView.setVisibility(View.GONE);
-                                }
-                            })
-                            .start();
-                    binding.saveButton.animate()
-                            .alpha(0.4f)
-                            .setDuration(200) // duration of the fade-out effect
-                            .withEndAction(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // Set the view to GONE after the fade-out
-
-                                }
-                            })
-                            .start();
-
-
-                    return;
-                }
-
-                String fileName = "temp.jpg";
-
-                File file = new File(requireContext().getFilesDir(), fileName);
-
-
-                ImageCapture.OutputFileOptions outputFileOptions =
-                        new ImageCapture.OutputFileOptions.Builder(
-                          file
-                        ).build();
-
-                cameraController.takePicture(
-                        outputFileOptions,
-                        Executors.newSingleThreadExecutor(),
-                        new ImageCapture.OnImageSavedCallback() {
-                            @Override
-                            public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                                Log.d("CameraFragment", "onImageSaved: " + file.getAbsolutePath());
-
-
-
-                              Uri uri=  outputFileResults.getSavedUri();
-
-                                Log.d("CameraFragment", "onImageSaved: " + uri);
-                                getActivity().runOnUiThread(new Runnable() {
-
-                                    @Override
-                                    public void run() {
-
-//                                stop camera
-                                        cameraController.unbind();
-
-                                        CameraFragment.this.uri = uri;
-
-                                        // Fade out the captureButton
-                                        binding.captureButton.animate()
-                                                .rotationBy(360)
-                                                .setInterpolator(new LinearInterpolator())
-                                                .setDuration(500) // duration of the fade-out effect
-                                                .withEndAction(new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        // Change the image resource after the fade-out
-                                                        binding.captureButton.setImageResource(R.drawable.baseline_autorenew_24);
-                                                        // Fade in the captureButton with the new image
-                                                        binding.captureButton.animate()
-                                                                .alpha(1f)
-                                                                .setDuration(200)
-                                                                .start();
-                                                    }
-                                                })
-                                                .start();
-                                        binding.capturedImageView.setImageURI(uri);
-                                        binding.capturedImageView.setVisibility(View.VISIBLE);
-                                        // Set the saveButton to be invisible and fully transparent
-                                        binding.saveButton.setAlpha(0.4f);
-                                        binding.saveButton.setVisibility(View.VISIBLE);
-
-// Fade in the saveButton
-                                        binding.saveButton.animate()
-                                                .alpha(1f)
-                                                .setDuration(500) // duration of the fade-in effect
-                                                .start();
-
-                                    }
-                                });
-
-
-
-
-                            }
-
-                            @Override
-                            public void onError(@NonNull ImageCaptureException exception) {
-                                Log.d("CameraFragment", "onError: " + exception.getMessage());
-                            }
-                        }
-                );
-//                cameraController.takePicture(
-//
-//                );
+//            log state
+            Log.d("CameraFragment", "onClick: " + mViewModel.cameraState.getValue());
+//                only capture when state is streaming
+            if (mViewModel.cameraState.getValue() == CameraState.STREAMING) {
+//                    initiate capture
+                mViewModel.captureImage();
+                return;
             }
+//            restart camepra if state is captured
+            if (mViewModel.cameraState.getValue() == CameraState.CAPTURED) {
+                mViewModel.restartCamera(CameraFragment.this);
+                return;
+            }
+
+
         });
-//
-//
-//        ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
-//                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-//                .build();
-//        //imageAnalysis.setAnalyzer(cameraController.getImageAnalysisBackgroundExecutor(), new YourAnalyzer());
-//        cameraController.setEnabledUseCases(IMAGE_CAPTURE|IMAGE_ANALYSIS);
-//        cameraController.setImageAnalysisAnalyzer(
-//                cameraController.getImageAnalysisBackgroundExecutor()
-//                , new YourAnalyzer()
-//        );
-        Log.d("CameraFragment", "analyze: test");
+
 
         return binding.getRoot();
     }
 
+    public void animateCapturing() {
+        // Fade out the captureButton
+        binding.captureButton.animate()
+                .rotationBy(360)
+                .setInterpolator(new LinearInterpolator())
+                .setDuration(500) // duration of the fade-out effect
+                .withEndAction(() -> {
+                    // Change the image resource after the fade-out
+                    binding.captureButton.setImageResource(R.drawable.baseline_autorenew_24);
+                    // Fade in the captureButton with the new image
+                    binding.captureButton.animate()
+                            .alpha(1f)
+                            .setDuration(200)
+                            .start();
+                })
+                .start();
 
-    @Override
-    public void onMLTaskCompleted(List<DetectionResult> results) {
+//        image uri is test.jpg
 
-//        check if there is one result with a score higher than 0.5
+        // Set the saveButton to be invisible and fully transparent
+        binding.saveButton.setAlpha(0.4f);
+        binding.saveButton.setVisibility(View.VISIBLE);
+
+// Fade in the saveButton
+        binding.saveButton.animate()
+                .alpha(1f)
+                .setDuration(500) // duration of the fade-in effect
+                .start();
+    }
+
+    public void animateRestarting() {
+
+// animate previewView to appear
+        binding.overlay.clear();
+        binding.previewView.setVisibility(View.VISIBLE);
+        binding.previewView.animate()
+                .alpha(1)
+                .setDuration(500) // duration of the fade-out effect
+                .withEndAction(() -> {
+                    // Set the view to GONE after the fade-out
+
+                })
+                .start();
+
+
+        binding.captureButton.animate()
+
+                .rotationBy(360)
+                .setInterpolator(new LinearInterpolator())
+                .setDuration(500) // duration of the fade-out effect
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Change the image resource after the fade-out
+                        binding.captureButton.setImageResource(R.drawable.baseline_camera_24);
+                        // Start fade-in effect after the image resource has been changed
+                        binding.captureButton.animate()
+                                .alpha(1f)
+                                .setDuration(200)
+                                .start();
+                    }
+                })
+                .start();
+
+
+
+        binding.capturedImageView.animate()
+                .alpha(0f)
+
+                .setDuration(200) // duration of the fade-out effect
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Set the view to GONE after the fade-out
+                        binding.capturedImageView.setVisibility(View.GONE);
+                    }
+                })
+                .start();
+        binding.saveButton.animate()
+                .alpha(0.4f)
+                .setDuration(200) // duration of the fade-out effect
+                .withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Set the view to GONE after the fade-out
+
+                    }
+                })
+                .start();
+    }
+
+    private void displayOverlay(List<DetectionResult> results) {
+
+        if (results == null) {
+            binding.overlay.clear();
+            binding.overlay.setVisibility(View.GONE);
+            return;
+        }
         boolean hasResult = false;
         for (DetectionResult result : results) {
-            if (result.getScoreAsFloat() >= 0.5) {
+            if (result.getScoreAsFloat() >= 0.45) {
                 hasResult = true;
                 break;
             }
         }
-
         if (!hasResult) {
-
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-
-                    Toast.makeText(requireContext(), "No objects detected", Toast.LENGTH_SHORT).show();
-                    binding.overlay.clear();
-                    binding.overlay.setVisibility(View.GONE);
-                }
-            });
+            binding.overlay.clear();
+            binding.overlay.setVisibility(View.GONE);
             return;
         }
 
+
         BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, results);
-
-//        run on life scope ui thread
-
-//        TODO remove listner, make live data
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                binding.overlay.clear();
-                binding.overlay.setVisibility(View.VISIBLE);
-                binding.overlay.add(overlay);
-            }
-        });
+        binding.overlay.clear();
+        binding.overlay.setVisibility(View.VISIBLE);
+        binding.overlay.add(overlay);
     }
 
-    @Override
-    public void onMLTaskFailed() {
-
-    }
 }

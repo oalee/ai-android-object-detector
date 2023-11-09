@@ -52,6 +52,11 @@ public class CameraManager {
                         )
                 )
         );
+//
+////        capture mode last
+//        cameraController.setImageCaptureMode(
+//                CameraController.IMAGE_CAPTURE
+//        );
 
     }
 

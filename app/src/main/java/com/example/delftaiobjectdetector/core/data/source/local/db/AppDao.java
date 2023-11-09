@@ -31,7 +31,7 @@ public interface AppDao {
 
 //    insert all, array
     @Insert
-    void insertAll(DetectionResult... detectionResults);
+    void insertAll(List<DetectionResult> detectionResults);
 
     @Query("DELETE FROM detections WHERE id = :id")
     void deleteById(int id);

@@ -1,9 +1,20 @@
 package com.example.delftaiobjectdetector.ui.camera;
 
+import android.content.Context;
 import android.net.Uri;
+import android.util.Log;
+import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
+import androidx.camera.core.ExperimentalGetImage;
+import androidx.camera.core.ImageAnalysis;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.ImageProxy;
 import androidx.camera.view.LifecycleCameraController;
+import androidx.camera.view.PreviewView;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -14,18 +25,26 @@ import com.example.delftaiobjectdetector.core.data.source.AppRepository;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
 import com.example.delftaiobjectdetector.core.utils.SizeManager;
 
+import java.io.File;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
 @HiltViewModel
-public class CameraViewModel extends ViewModel {
+public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener {
 
     private MutableLiveData<List<DetectionResult>> mDetectionResults = new MutableLiveData<>();
     public
     LiveData<List<DetectionResult>> detectionResults = mDetectionResults;
+
+    private MutableLiveData<CameraState> mCameraState = new MutableLiveData<>(CameraState.STREAMING);
+
+    public LiveData<CameraState> cameraState = mCameraState;
+
 
     private CameraManager cameraManager;
 
@@ -35,26 +54,109 @@ public class CameraViewModel extends ViewModel {
 
     private SizeManager sizeManager;
 
+    private Context context;
+
     public SizeManager getSizeManager() {
         return sizeManager;
     }
 
 
     @Inject
-    public CameraViewModel(CameraManager cameraManager, MLUtils mlUtils, AppRepository appRepository, SizeManager sizeManager) {
+    public CameraViewModel(CameraManager cameraManager, MLUtils mlUtils, AppRepository appRepository, SizeManager sizeManager, @ApplicationContext Context context) {
 
         this.cameraManager = cameraManager;
         this.sizeManager = sizeManager;
         this.appRepository = appRepository;
         this.mlUtils = mlUtils;
+        this.context = context;
 
+    }
+
+    public void bindCamera(LifecycleOwner lifecycleOwner, PreviewView previewView) {
+
+        bindCamera(lifecycleOwner);
+        LifecycleCameraController cameraController = cameraManager.getCameraController();
+        previewView.setController(cameraController);
+
+
+    }
+
+    public void bindCamera(LifecycleOwner lifecycleOwner) {
+
+        LifecycleCameraController cameraController = cameraManager.getCameraController();
+        cameraController.bindToLifecycle(lifecycleOwner);
+        cameraController.setImageAnalysisAnalyzer(
+                Executors.newSingleThreadExecutor(),
+                image -> {
+                    detectObjects(image, CameraViewModel.this);
+                    image.close();
+                }
+        );
+    }
+
+    public void restartCapture(LifecycleOwner owner){
+        if (cameraState.getValue() != CameraState.CAPTURED) {
+            return;
+        }
+        mCameraState.postValue(CameraState.RESTARTING);
+        bindCamera(owner);
+
+
+    }
+
+    public void captureImage(){
+
+        if (cameraState.getValue() != CameraState.STREAMING) {
+            return;
+        }
+        Log.d("CameraFragment", "captureImage: ");
+
+        unbindML();
+
+//        post value to change camera state
+        mCameraState.postValue(CameraState.CAPTURING);
+
+        LifecycleCameraController cameraController = cameraManager.getCameraController();
+
+        String fileName = "temp.jpg";
+        File file = new File(this.context.getFilesDir(), fileName);
+
+
+
+        ImageCapture.OutputFileOptions outputFileOptions =
+                new ImageCapture.OutputFileOptions.Builder(
+                        file
+                ).build();
+
+        cameraController.takePicture(
+                outputFileOptions,
+                Executors.newSingleThreadExecutor(),
+                new ImageCapture.OnImageSavedCallback() {
+                    @Override
+                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                        Log.d("CameraFragment", "onImageSaved: " + file.getAbsolutePath());
+
+                        mCameraState.postValue(CameraState.CAPTURED);
+//                        release camera for now
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+
+                        Log.d("CameraFragment", "onError: " + exception.getMessage());
+
+                        mCameraState.postValue(CameraState.ERROR_CAMERA_CAPTURE);
+                    }
+                }
+        );
     }
 
     public LifecycleCameraController getCameraController() {
         return cameraManager.getCameraController();
     }
 
-    public void insertResults(DetectionResult[] detectionResults, String imagePath) {
+    public void insertResults(List<DetectionResult> detectionResults, String imagePath) {
         appRepository.insertResults(detectionResults, imagePath);
     }
 
@@ -66,7 +168,7 @@ public class CameraViewModel extends ViewModel {
         mlUtils.detectObjects(imageUri, listener);
     }
 
-    public void detectObjects( ImageProxy imageProxy, MLUtils.MLTaskListener listener) {
+    public void detectObjects(ImageProxy imageProxy, MLUtils.MLTaskListener listener) {
         mlUtils.detectObjects(imageProxy, new MLUtils.MLTaskListener() {
             @Override
             public void onMLTaskCompleted(List<DetectionResult> results) {
@@ -83,11 +185,60 @@ public class CameraViewModel extends ViewModel {
         });
     }
 
-
-
+    @Override
+    public void onMLTaskCompleted(List<DetectionResult> results) {
+        mDetectionResults.postValue(results);
+    }
 
     @Override
-    protected void onCleared() {
-        super.onCleared();
+    public void onMLTaskFailed() {
+
     }
+
+    public void restartCamera(LifecycleOwner owner) {
+
+//        only restart when state is captured
+        if (cameraState.getValue() != CameraState.CAPTURED) {
+            return;
+        }
+
+        mCameraState.postValue(
+                CameraState.RESTARTING
+        );
+
+        bindCamera(owner);
+
+//        backgroudn thread wait for 1 second
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            mCameraState.postValue(
+                    CameraState.STREAMING
+            );
+        });
+
+
+    }
+
+    public void unbindML() {
+        cameraManager.getCameraController().clearImageAnalysisAnalyzer();
+    }
+
+    public void bindML(){
+        cameraManager.getCameraController().setImageAnalysisAnalyzer(
+                Executors.newSingleThreadExecutor(),
+                image -> {
+                    detectObjects(image, CameraViewModel.this);
+                    image.close();
+                }
+        );
+    }
+
+
+    //     enum class camera state
+
 }
