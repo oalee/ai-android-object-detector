@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class AppRepository {
 
     private final

@@ -7,7 +7,9 @@ import com.example.delftaiobjectdetector.core.di.DatabaseModule;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class LocalDataSource {
 
     private final

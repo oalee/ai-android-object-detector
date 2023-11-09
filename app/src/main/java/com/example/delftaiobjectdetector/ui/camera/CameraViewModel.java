@@ -12,6 +12,7 @@ import com.example.delftaiobjectdetector.core.camera.CameraManager;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.core.data.source.AppRepository;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
+import com.example.delftaiobjectdetector.core.utils.SizeManager;
 
 import java.util.List;
 
@@ -32,11 +33,18 @@ public class CameraViewModel extends ViewModel {
 
     private AppRepository appRepository;
 
+    private SizeManager sizeManager;
+
+    public SizeManager getSizeManager() {
+        return sizeManager;
+    }
+
+
     @Inject
-    public CameraViewModel(CameraManager cameraManager, MLUtils mlUtils, AppRepository appRepository) {
+    public CameraViewModel(CameraManager cameraManager, MLUtils mlUtils, AppRepository appRepository, SizeManager sizeManager) {
 
         this.cameraManager = cameraManager;
-
+        this.sizeManager = sizeManager;
         this.appRepository = appRepository;
         this.mlUtils = mlUtils;
 

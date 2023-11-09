@@ -64,6 +64,7 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
         previewView.setController(cameraController);
 
 
+        mViewModel.getSizeManager().setCameraHeightPortraitPreview(binding.previewView);
 
 
         cameraController.setImageAnalysisAnalyzer(

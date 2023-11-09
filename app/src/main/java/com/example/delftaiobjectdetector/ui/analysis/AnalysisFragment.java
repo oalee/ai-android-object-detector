@@ -34,6 +34,7 @@ public class AnalysisFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
          binding = FragmentAnalysisBinding.inflate(inflater, container, false);
+         mViewModel = new ViewModelProvider(this).get(AnalysisViewModel.class);
 
 //        get arguments from bundle
         AnalysisFragmentArgs args = AnalysisFragmentArgs.fromBundle(getArguments());
@@ -42,18 +43,6 @@ public class AnalysisFragment extends Fragment {
         File newFile = new File(requireContext().getFilesDir(), imagePath);
 
         binding.capturedImageView.setImageURI(Uri.fromFile(newFile));
-
-
-
-        return binding.getRoot();
-    }
-
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        mViewModel = new ViewModelProvider(this).get(AnalysisViewModel.class);
 
         mViewModel.getDetectionResults(imagePath).observe(getViewLifecycleOwner(), detectionResults -> {
             if (detectionResults == null) {
@@ -68,5 +57,20 @@ public class AnalysisFragment extends Fragment {
             BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, detectionResults);
             binding.overlay.add(overlay);
         });
+
+        mViewModel.getSizeManager().setCameraHeightPortraitPreview(
+                binding.capturedImageView
+        );
+
+        return binding.getRoot();
+    }
+
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+
+
     }
 }

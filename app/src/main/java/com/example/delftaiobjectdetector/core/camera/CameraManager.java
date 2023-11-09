@@ -11,9 +11,11 @@ import androidx.camera.view.LifecycleCameraController;
 import com.google.common.util.concurrent.ListenableFuture;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
+@Singleton
 public class CameraManager {
 
     private LifecycleCameraController cameraController;
