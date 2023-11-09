@@ -3,6 +3,7 @@ package com.example.delftaiobjectdetector.ui.camera;
 import static androidx.core.content.ContentProviderCompat.requireContext;
 
 import android.content.Context;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,7 @@ import com.example.delftaiobjectdetector.core.ml.MLUtils;
 import com.example.delftaiobjectdetector.core.utils.SizeManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -50,6 +52,10 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
     private MutableLiveData<String> mSavedImageName = new MutableLiveData<>();
 
     public LiveData<String> savedImageName = mSavedImageName;
+
+    private MutableLiveData<Integer> mRotationDegrees = new MutableLiveData<>();
+
+    public LiveData<Integer> rotationDegrees = mRotationDegrees;
 
 
     private CameraManager cameraManager;
@@ -95,12 +101,14 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
                 Executors.newSingleThreadExecutor(),
                 image -> {
                     detectObjects(image, CameraViewModel.this);
+                    Integer rotationDegrees = image.getImageInfo().getRotationDegrees();
+                    mRotationDegrees.postValue(rotationDegrees);
                     image.close();
                 }
         );
     }
 
-    public void restartCapture(LifecycleOwner owner){
+    public void restartCapture(LifecycleOwner owner) {
         if (cameraState.getValue() != CameraState.CAPTURED) {
             return;
         }
@@ -110,7 +118,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 
     }
 
-    public void captureImage(){
+    public void captureImage() {
 
         if (cameraState.getValue() != CameraState.STREAMING) {
             return;
@@ -128,11 +136,11 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         File file = new File(this.context.getFilesDir(), fileName);
 
 
-
         ImageCapture.OutputFileOptions outputFileOptions =
                 new ImageCapture.OutputFileOptions.Builder(
                         file
-                ).build();
+                ).
+                        build();
 
         cameraController.takePicture(
                 outputFileOptions,
@@ -142,9 +150,36 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         Log.d("CameraFragment", "onImageSaved: " + file.getAbsolutePath());
 
+                        Uri savedUri = outputFileResults.getSavedUri(); // Get the Uri of the saved file
+                        String filePath = savedUri.getPath(); // Convert Uri to file path if needed
+
+                        try {
+                            ExifInterface exif = new ExifInterface(filePath);
+
+//                            for orientation 0 save 90
+
+                            int degrees = rotationDegrees.getValue();
+                            Log.d("CameraFragment", "onImageSaved: " + degrees);
+                            if (degrees == 0) {
+                                exif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_90));
+                                exif.saveAttributes();
+
+                            }
+                            if (degrees == 180) {
+                                exif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_270));
+                                exif.saveAttributes();
+
+                            }
+                            // Set the orientation tag to rotate 90 degrees
+
+                            Log.d("CameraFragment", "EXIF metadata updated with portrait orientation.");
+                        } catch (IOException e) {
+                            Log.e("CameraFragment", "Failed to update EXIF metadata", e);
+                        }
                         mCameraState.postValue(CameraState.CAPTURED);
 //                        release camera for now
-
+//                        Integer rotationDegrees =  outputFileResults.getSavedImage().getImageInfo().getRotationDegrees();
+//                        mRotationDegrees.postValue(rotationDegrees);
                     }
 
                     @Override
@@ -227,7 +262,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         cameraManager.getCameraController().clearImageAnalysisAnalyzer();
     }
 
-    public void bindML(){
+    public void bindML() {
         cameraManager.getCameraController().setImageAnalysisAnalyzer(
                 Executors.newSingleThreadExecutor(),
                 image -> {
@@ -237,7 +272,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         );
     }
 
-    public void performSave(){
+    public void performSave() {
 
         mCameraState.postValue(CameraState.SAVING_IMAGE_RESULT);
 
@@ -265,7 +300,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 
     }
 
-    public void onNavigatedToResult(){
+    public void onNavigatedToResult() {
         mCameraState.postValue(CameraState.CAPTURED);
     }
 

@@ -12,6 +12,10 @@ public class GraphicOverlay extends View {
     private final Object lock = new Object();
     private final List<Graphic> graphics = new ArrayList<>();
 
+    public float parentRotation = 0;
+
+
+
     // Constructors
     public GraphicOverlay(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -21,8 +25,17 @@ public class GraphicOverlay extends View {
     public void add(Graphic graphic) {
         synchronized (lock) {
             graphics.add(graphic);
+            graphic.overlay = this;
         }
         postInvalidate();
+    }
+
+    public void setParentRotation(float parentRotation) {
+        this.parentRotation = parentRotation;
+    }
+
+    public float getParentRotation() {
+        return parentRotation;
     }
 
     public void clear() {
@@ -45,11 +58,13 @@ public class GraphicOverlay extends View {
 
     // Abstract class for creating graphics (bounding boxes, labels, etc.)
     public abstract static class Graphic {
-        private GraphicOverlay overlay;
+        public GraphicOverlay overlay;
 
         public Graphic(GraphicOverlay overlay) {
             this.overlay = overlay;
         }
+
+        public abstract GraphicOverlay getOverlay() ;
 
         public abstract void draw(Canvas canvas);
 

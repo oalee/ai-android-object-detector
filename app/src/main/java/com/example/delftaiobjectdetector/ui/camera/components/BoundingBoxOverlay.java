@@ -23,6 +23,7 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
     public BoundingBoxOverlay(GraphicOverlay overlay, List<DetectionResult> detections) {
         super(overlay);
 
+
         this.detections = detections;
 
         // Paint for the boxes
@@ -40,8 +41,45 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
     }
 
     @Override
-    public void draw(Canvas canvas) {
+    public GraphicOverlay getOverlay() {
 
+        return this.overlay;
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        canvas.save();
+
+        float rotation = overlay.getParentRotation();
+        int canvasWidth = canvas.getWidth();
+        int canvasHeight = canvas.getHeight();
+
+        int originalWidth = 480;
+        int originalHeight = 640;
+
+
+        if (rotation != 90) {
+            canvas.save(); // Save the canvas state before any manipulation
+
+            // Depending on the rotation, adjust the canvas.
+            // For example, if rotation is 180, rotate the canvas around its center
+            if (rotation == 180) {
+                canvas.rotate(270);
+                canvas.translate(-canvasHeight, 0);
+            } else if (rotation == 270) {
+                // for 270 degrees, rotate and translate to adjust the origin
+                canvas.rotate(180);
+                canvas.translate(-canvasWidth, -canvasHeight);
+            } else if (rotation == 0) {
+
+                canvas.rotate(90);
+                canvas.translate(0, -canvas.getWidth());
+            }
+
+            // Add other conditions if you expect other rotations
+        }
+
+        // If
         for (DetectionResult detection : detections) {
             if (detection.getScoreAsFloat() >= 0.5) {
                 // Use a different color for each label
@@ -49,16 +87,13 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
 
                 RectF rect = detection.getBoundingBox();
 
-                int originalWidth = 480 ;
-                int originalHeight = 640;
 
 
 
-                int canvasWidth = canvas.getWidth();
-                int canvasHeight = canvas.getHeight();
+//                need to rotate if the image is rotated
 
-//                log
-                Log.d("Draw", "canvas: " + canvasWidth + " " + canvasHeight);
+
+
 
 //                scale rect to canvas width and height
                 float scaleX = (float) canvasWidth / originalWidth;
@@ -66,12 +101,12 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
 
                 RectF scaledRect = new RectF(rect.left * scaleX, rect.top * scaleY, rect.right * scaleX, rect.bottom * scaleY);
 
-//                rotate 90 degrees rect
-//                RectF scaledRect = new RectF(
-//                        detection.getBoundingBox().top * scaleX,
-//                        detection.getBoundingBox().left * scaleY,
-//                        detection.getBoundingBox().bottom * scaleX,
-//                        detection.getBoundingBox().right * scaleY);
+
+                    // For 90 degrees, use the original scaling (portrait mode)
+                    scaledRect = new RectF(
+                            rect.left * scaleX, rect.top * scaleY,
+                            rect.right * scaleX, rect.bottom * scaleY);
+
 
                 // Draw the bounding box
                 canvas.drawRect(scaledRect, paint);
@@ -80,8 +115,14 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
                 canvas.drawText(detection.getCategoryAsString() + " " + String.format("%.2f", detection.getScoreAsFloat()),
                         scaledRect.left, scaledRect.top  + 40, textPaint);
 
-                Log.d("Draw", "draw: " + detection.getCategoryAsString() + " " + String.format("%.2f", detection.getScoreAsFloat()));
+//                Log.d("Draw", "draw: " + detection.getCategoryAsString() + " " + String.format("%.2f", detection.getScoreAsFloat()));
             }
+
+
+        }
+
+        if (rotation != 90) {
+            canvas.restore(); // Restore the canvas to its original state if we changed it
         }
     }
 

@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
@@ -100,6 +101,7 @@ public class CameraFragment extends Fragment {
                         binding.previewView.setVisibility(View.INVISIBLE);
 
                         File file = new File(requireContext().getFilesDir(), "temp.jpg");
+//                        Glide.with(requireContext()).load(file).into(binding.capturedImageView);
                         binding.capturedImageView.setImageURI(null);
                         binding.capturedImageView.setImageURI(Uri.fromFile(file));
                         binding.capturedImageView.setVisibility(View.VISIBLE);
@@ -120,6 +122,18 @@ public class CameraFragment extends Fragment {
                 getViewLifecycleOwner(),
                 detectionResults -> {
                     displayOverlay(detectionResults);
+                }
+        );
+
+
+        mViewModel.rotationDegrees.observe(
+                getViewLifecycleOwner(),
+                rotationDegrees -> {
+//                    binding.capturedImageView.setRotation(rotationDegrees);
+
+                    Log.d("CameraFragment", "onCreateView: " + rotationDegrees);
+//                    binding.overlay.setRotation(Math.abs(rotationDegrees-90));
+                    binding.overlay.setParentRotation(rotationDegrees);
                 }
         );
 
