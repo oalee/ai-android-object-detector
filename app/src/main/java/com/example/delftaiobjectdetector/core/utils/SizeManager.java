@@ -50,5 +50,14 @@ public class SizeManager {
         setHeight(getCameraHeightPortraitPreview(), view);
     }
 
+    public void setViewWidthAndHeight(View view, int width, int height) {
+        setWidth(width, view);
+        setHeight(height, view);
+    }
+
+    public void setViewWidthAndHeight(View view, int size) {
+        setWidth(size, view);
+        setHeight(size, view);
+    }
 
 }

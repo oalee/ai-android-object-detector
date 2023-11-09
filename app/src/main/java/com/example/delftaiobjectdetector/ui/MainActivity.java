@@ -10,13 +10,19 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import com.example.delftaiobjectdetector.R;
+import com.example.delftaiobjectdetector.core.ml.MLUtils;
 
 import java.util.logging.Logger;
+
+import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
+
+    @Inject
+    MLUtils mlUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         handlePermissions();
+
+        mlUtils.bindToLifecycle(this);
 
     }
 

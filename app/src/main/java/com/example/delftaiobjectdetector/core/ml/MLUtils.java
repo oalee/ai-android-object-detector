@@ -15,6 +15,8 @@ import android.util.Log;
 import androidx.annotation.OptIn;
 import androidx.camera.core.ExperimentalGetImage;
 import androidx.camera.core.ImageProxy;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.LifecycleOwner;
 
 import com.example.delftaiobjectdetector.core.camera.YuvToRgbConverter;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
@@ -32,10 +34,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
 
-public class MLUtils {
+@Singleton
+public class MLUtils implements DefaultLifecycleObserver {
     Context mContext;
 
     EfficientdetLite2Detection model;
@@ -44,19 +48,43 @@ public class MLUtils {
     public MLUtils(@ApplicationContext Context context) {
         mContext = context;
 
+        initModel();
+
+
+    }
+
+    private void initModel() {
         try {
-            this.model = EfficientdetLite2Detection.newInstance(context);
+            this.model = EfficientdetLite2Detection.newInstance(mContext);
         } catch (IOException e) {
-//            failed loading model
+
         }
-
-
     }
 
     public EfficientdetLite2Detection getModel() {
+
+        if  (model == null) {
+            initModel();
+        }
+
         return model;
     }
 
+    // Implement the DefaultLifecycleObserver interface methods
+    @Override
+    public void onDestroy(LifecycleOwner owner) {
+        // This will be called when the LifecycleOwner (Activity or Fragment) is destroyed
+        if (model != null) {
+            // Release resources or cleanup here
+            model.close(); // assuming there is a close method to release resources
+            model = null;
+        }
+    }
+
+    // Make sure to initialize MLUtils with the lifecycle of the Activity or Fragment
+    public void bindToLifecycle(LifecycleOwner lifecycleOwner) {
+        lifecycleOwner.getLifecycle().addObserver(this);
+    }
     private Bitmap padBitmapToSize(Bitmap bitmap, int width, int height) {
         Bitmap paddedBitmap = Bitmap.createBitmap(width, height, bitmap.getConfig());
         Canvas canvas = new Canvas(paddedBitmap);
@@ -203,15 +231,8 @@ public class MLUtils {
             listener.onMLTaskCompleted(scaledResults);
         }
 
-//        this.model.close();
     }
 
-    public Bitmap ToBitmap(Image image) {
-        ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-        byte[] bytes = new byte[buffer.remaining()];
-        buffer.get(bytes);
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length, null);
-    }
 
     @OptIn(markerClass = ExperimentalGetImage.class) public void detectObjects(ImageProxy srcImage, MLTaskListener listener) {
 

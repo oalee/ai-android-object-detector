@@ -46,18 +46,20 @@
         app:layout_constraintEnd_toEndOf="@id/previewView"
         />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/captureButton"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:src="@drawable/baseline_camera_24"
+        android:layout_marginBottom="32dp"
         android:background="#00000000"
+        android:src="@drawable/baseline_camera_24"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/previewView"
-        app:layout_constraintVertical_bias="0.1" />
+        app:layout_constraintWidth_percent="0.3" />
 
     <ImageButton
         android:id="@+id/saveButton"
@@ -65,10 +67,23 @@
         android:layout_height="wrap_content"
         android:background="#00000000"
         android:src="@drawable/baseline_save_24"
-        android:visibility="gone"
+        android:visibility="visible"
+        android:scaleType="fitXY"
+        android:alpha="0.4"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/captureButton"
         app:layout_constraintTop_toTopOf="@+id/captureButton" />
 
+    <ImageView
+        android:id="@+id/galleryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#00000000"
+        android:src="@drawable/baseline_collections_24"
+        android:visibility="visible"
+        app:layout_constraintEnd_toStartOf="@+id/captureButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/captureButton" />
 </androidx.constraintlayout.widget.ConstraintLayout>

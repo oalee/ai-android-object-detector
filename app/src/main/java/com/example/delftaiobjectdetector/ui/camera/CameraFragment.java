@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
+import com.example.delftaiobjectdetector.core.utils.SizeManager;
 import com.example.delftaiobjectdetector.databinding.FragmentCameraBinding;
 import com.example.delftaiobjectdetector.ui.camera.components.BoundingBoxOverlay;
 import com.google.mlkit.vision.common.InputImage;
@@ -63,8 +64,12 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
         cameraController.bindToLifecycle(this);
         previewView.setController(cameraController);
 
+        SizeManager sizeManager = mViewModel.getSizeManager();
 
-        mViewModel.getSizeManager().setCameraHeightPortraitPreview(binding.previewView);
+        sizeManager.setCameraHeightPortraitPreview(binding.previewView);
+        sizeManager.setViewWidthAndHeight(binding.captureButton, (int) (sizeManager.getWidth() *0.15f));
+        sizeManager.setViewWidthAndHeight(binding.saveButton, (int) (sizeManager.getWidth() *0.13f));
+        sizeManager.setViewWidthAndHeight(binding.galleryButton, (int) (sizeManager.getWidth() *0.13f));
 
 
         cameraController.setImageAnalysisAnalyzer(
@@ -89,6 +94,10 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
 
         binding.saveButton.setOnClickListener(
                 v -> {
+
+                    if (CameraFragment.this.uri == null) {
+                        return;
+                    }
                     String fileName = "temp.jpg";
 
                     File file = new File(requireContext().getFilesDir(), fileName);
@@ -172,13 +181,13 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
                             })
                             .start();
                     binding.saveButton.animate()
-                            .alpha(0f)
+                            .alpha(0.4f)
                             .setDuration(200) // duration of the fade-out effect
                             .withEndAction(new Runnable() {
                                 @Override
                                 public void run() {
                                     // Set the view to GONE after the fade-out
-                                    binding.saveButton.setVisibility(View.GONE);
+
                                 }
                             })
                             .start();
@@ -241,7 +250,7 @@ public class CameraFragment extends Fragment implements MLUtils.MLTaskListener {
                                         binding.capturedImageView.setImageURI(uri);
                                         binding.capturedImageView.setVisibility(View.VISIBLE);
                                         // Set the saveButton to be invisible and fully transparent
-                                        binding.saveButton.setAlpha(0f);
+                                        binding.saveButton.setAlpha(0.4f);
                                         binding.saveButton.setVisibility(View.VISIBLE);
 
 // Fade in the saveButton
