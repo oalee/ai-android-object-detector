@@ -14,8 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.databinding.FragmentAnalysisBinding;
+import com.example.delftaiobjectdetector.ui.analysis.components.DetectedItemsAdapter;
 import com.example.delftaiobjectdetector.ui.camera.components.BoundingBoxOverlay;
 
 import java.io.File;
@@ -47,15 +47,15 @@ public class AnalysisFragment extends Fragment {
         );
 
 
-        binding.overlay.setImageSize(
-                mViewModel.getSizeManager().getImageSize(
-                        Uri.fromFile(newFile)
-                )
-        );
-
-        mViewModel.getSizeManager().setCameraHeightBasedOnImageSize(
-                binding.overlay, Uri.fromFile(newFile)
-        );
+//        binding.overlay.setImageSize(
+//                mViewModel.getSizeManager().getImageSize(
+//                        Uri.fromFile(newFile)
+//                )
+//        );
+//
+//        mViewModel.getSizeManager().setCameraHeightBasedOnImageSize(
+//                binding.overlay, Uri.fromFile(newFile)
+//        );
         binding.capturedImageView.setImageURI(Uri.fromFile(newFile));
 
         mViewModel.getDetectionResults(imagePath).observe(getViewLifecycleOwner(), detectionResults -> {

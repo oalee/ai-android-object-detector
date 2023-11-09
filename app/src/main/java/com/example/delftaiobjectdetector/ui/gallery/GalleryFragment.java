@@ -1,5 +1,7 @@
 package com.example.delftaiobjectdetector.ui.gallery;
 
+import static androidx.navigation.fragment.FragmentKt.findNavController;
+
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -37,14 +39,21 @@ public class GalleryFragment extends Fragment {
         mViewModel = new ViewModelProvider(this).get(GalleryViewModel.class);
 
         mViewModel.getDetectionResults().observe(getViewLifecycleOwner(), detectionResults -> {
-            binding.galleryRecyclerView.setAdapter(new GalleryAdapter(detectionResults));
+            binding.textView.setVisibility(detectionResults.isEmpty() ? View.VISIBLE : View.GONE);
+
+            binding.galleryRecyclerView.setAdapter(new GalleryAdapter(detectionResults, imagePath -> {
+                GalleryFragmentDirections.ActionGalleryFragmentToAnalysisFragment action =
+                        GalleryFragmentDirections.actionGalleryFragmentToAnalysisFragment(imagePath);
+
+                findNavController(this).navigate(action);
+
+            }));
 //            set staggered grid layout manager
             binding.galleryRecyclerView.setLayoutManager(
                     new StaggeredGridLayoutManager(
                             2, StaggeredGridLayoutManager.VERTICAL
                     )
             );
-            binding.textView.setVisibility(detectionResults.isEmpty() ? View.VISIBLE : View.GONE);
         });
 
         return binding.getRoot();

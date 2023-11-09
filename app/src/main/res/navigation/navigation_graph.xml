@@ -34,5 +34,9 @@
         android:id="@+id/galleryFragment"
         android:name="com.example.delftaiobjectdetector.ui.gallery.GalleryFragment"
         android:label="fragment_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_gallery" >
+        <action
+            android:id="@+id/action_galleryFragment_to_analysisFragment"
+            app:destination="@id/analysisFragment" />
+    </fragment>
 </navigation>

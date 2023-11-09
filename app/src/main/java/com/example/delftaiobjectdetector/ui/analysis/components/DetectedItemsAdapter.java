@@ -1,4 +1,4 @@
-package com.example.delftaiobjectdetector.ui.analysis;
+package com.example.delftaiobjectdetector.ui.analysis.components;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,9 +67,13 @@ public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdap
             float confidence = detectionResult.getScoreAsFloat();
 
 //            join category and confidence, e.g. "Person (0.99)"
-            String name = category + " Confidence: " + confidence + "%";
+            String name = category ;
 
             binding.detectedItemTextView.setText( name);
+
+//            2 decimal places
+            binding.confidenceTextView.setText("Confidence:" + String.format("%.2f", confidence));
+
 //            binding.de.setText(String.valueOf(detectionResult.getConfidence()));
         }
     }

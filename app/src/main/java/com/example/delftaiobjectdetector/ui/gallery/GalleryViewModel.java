@@ -46,6 +46,12 @@ public class GalleryViewModel extends ViewModel {
                     List<List<DetectionResult>> groupedData = new ArrayList<>(allData.stream()
                             .collect(Collectors.groupingBy(DetectionResult::getImageName))
                             .values());
+//                    reverse the list
+                    groupedData = groupedData.stream().map(list -> {
+                        List<DetectionResult> reversedList = new ArrayList<>(list);
+                        java.util.Collections.reverse(reversedList);
+                        return reversedList;
+                    }).collect(Collectors.toList());
 
                     detectionResults.postValue(groupedData);
                 }
