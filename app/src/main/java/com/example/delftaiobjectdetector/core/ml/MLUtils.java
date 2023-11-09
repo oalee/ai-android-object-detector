@@ -20,6 +20,7 @@ import androidx.lifecycle.LifecycleOwner;
 
 import com.example.delftaiobjectdetector.core.camera.YuvToRgbConverter;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 import com.example.delftaiobjectdetector.core.utils.BitmapUtils;
 import com.example.delftaiobjectdetector.ml.EfficientdetLite2Detection;
 import com.google.mlkit.vision.common.InputImage;
@@ -81,7 +82,7 @@ public class MLUtils implements DefaultLifecycleObserver {
         }
     }
 
-    // Make sure to initialize MLUtils with the lifecycle of the Activity or Fragment
+    // Make sure to initialize and release MLUtils with the lifecycle of the Activity or Fragment
     public void bindToLifecycle(LifecycleOwner lifecycleOwner) {
         lifecycleOwner.getLifecycle().addObserver(this);
     }
@@ -120,18 +121,23 @@ public class MLUtils implements DefaultLifecycleObserver {
         }
         Bitmap originalBitmap = BitmapFactory.decodeStream(imageStream);
 
+        int rotation = 0;
+
         switch (orientation) {
 
             case ExifInterface.ORIENTATION_ROTATE_90:
                 originalBitmap = rotateImage(originalBitmap, 90);
+                rotation = 90;
                 break;
 
             case ExifInterface.ORIENTATION_ROTATE_180:
                 originalBitmap = rotateImage(originalBitmap, 180);
+                rotation = 180;
                 break;
 
             case ExifInterface.ORIENTATION_ROTATE_270:
                 originalBitmap = rotateImage(originalBitmap, 270);
+                rotation = 270;
                 break;
 
             case ExifInterface.ORIENTATION_NORMAL:
@@ -173,24 +179,12 @@ public class MLUtils implements DefaultLifecycleObserver {
 
         List<EfficientdetLite2Detection.DetectionResult> results = outputs.getDetectionResultList();
 
-//        for (EfficientdetLite2Detection.DetectionResult result : results) {
-//            Log.d("MLUtils", "detectObjects: " + result.getCategoryAsString() + " " + result.getScoreAsFloat());
-//        }
 
         List<DetectionResult> scaledResults = new ArrayList<>();
         float offsetX = (448 - scaledWidth) / 2f;
         float offsetY = (448 - scaledHeight) / 2f;
 
-        Log.d(
-                "MLUtils",
-                String.format(
-                        "Scaled Image Size: %d x %d, Offset: %f x %f",
-                        scaledWidth,
-                        scaledHeight,
-                        offsetX,
-                        offsetY
-                )
-        );
+
 
         for (EfficientdetLite2Detection.DetectionResult result : results) {
             RectF boundingBox = result.getLocationAsRectF();
@@ -221,12 +215,16 @@ public class MLUtils implements DefaultLifecycleObserver {
             scaledResults.add(new DetectionResult(
                     result.getCategoryAsString(),
                     boundingBox,
+                    result.getLocationAsRectF(),
                     result.getScoreAsFloat()
             ));
 
         }
+
+        ImageMetadata imageMetadata = new ImageMetadata(imageUri.getLastPathSegment(), originalWidth, originalHeight, rotation, scaleFactor,  (int) offsetX, (int) offsetY);
+
         if (listener != null) {
-            listener.onMLTaskCompleted(scaledResults);
+            listener.onMLTaskCompleted(scaledResults, imageMetadata);
         }
 
     }
@@ -246,7 +244,7 @@ public class MLUtils implements DefaultLifecycleObserver {
         Bitmap originalBitmap = BitmapUtils.getBitmap(srcImage);
 
 //           rotate image
-//        int rotation = srcImage.getImageInfo().getRotationDegrees();
+        int rotation = srcImage.getImageInfo().getRotationDegrees();
 //
 //        originalBitmap = rotateImage(originalBitmap, rotation);
 //
@@ -349,12 +347,16 @@ public class MLUtils implements DefaultLifecycleObserver {
             scaledResults.add(new DetectionResult(
                     result.getCategoryAsString(),
                     boundingBox,
+                    result.getLocationAsRectF(),
                     result.getScoreAsFloat()
             ));
 
         }
+
+        ImageMetadata imageMetadata = new ImageMetadata("image_name", originalWidth, originalHeight, rotation, scaleFactor,  (int) offsetX, (int) offsetY);
+
         if (listener != null) {
-            listener.onMLTaskCompleted(scaledResults);
+            listener.onMLTaskCompleted(scaledResults, imageMetadata);
         }
 
 //        this.model.close();
@@ -366,7 +368,7 @@ public class MLUtils implements DefaultLifecycleObserver {
 
 
     public interface MLTaskListener {
-        void onMLTaskCompleted(List<DetectionResult> results);
+        void onMLTaskCompleted(List<DetectionResult> results, ImageMetadata imageMetadata);
 
         void onMLTaskFailed();
     }

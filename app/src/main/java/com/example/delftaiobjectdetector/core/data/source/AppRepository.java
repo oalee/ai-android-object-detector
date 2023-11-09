@@ -1,6 +1,7 @@
 package com.example.delftaiobjectdetector.core.data.source;
 
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 import com.example.delftaiobjectdetector.core.data.source.local.LocalDataSource;
 
 import java.util.List;
@@ -20,6 +21,15 @@ public class AppRepository {
         this.localDataSource = localDataSource;
     }
 
+
+    public List<ImageMetadata> getAllImageMetaData() {
+        return localDataSource.getAllImageMetaData();
+    }
+
+    public ImageMetadata getByImageName(String imageName) {
+        return localDataSource.getByImageName(imageName);
+    }
+
     public List<String> getImages() {
         return localDataSource.getImages();
     }
@@ -34,11 +44,14 @@ public class AppRepository {
     }
 
 
-    public void insertResults(List<DetectionResult> detectionResults, String imagePath) {
+    public void insertResults(List<DetectionResult> detectionResults, String imagePath, ImageMetadata imageMetadata) {
+
+
 
 //        run on background thread
 
             localDataSource.insertAll(detectionResults, imagePath);
+            localDataSource.insertImageMetadata(imageMetadata);
 
 //        localDataSource.insertAll(detectionResults, imagePath);
     }

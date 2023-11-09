@@ -10,6 +10,9 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,5 +101,10 @@ public class ImageManager {
 
         Bitmap croppedBitmap = getCroppedImage(bitmap, boundingBox);
         detectedItemImageView.setImageBitmap(croppedBitmap);
+    }
+
+    public void loadImage(String imageName, DetectionResult detectionResult, ImageMetadata imageMetadata, ImageView detectedItemImageView) {
+
+
     }
 }

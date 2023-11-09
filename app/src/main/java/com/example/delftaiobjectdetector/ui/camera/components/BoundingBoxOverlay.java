@@ -9,6 +9,7 @@ import android.graphics.RectF;
 import android.util.Log;
 
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 
 import java.util.List;
 
@@ -17,14 +18,15 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
     private final Paint paint;
     private final Paint textPaint;
     private final List<DetectionResult> detections;
+    private final ImageMetadata imageMetadata;
 
 
-
-    public BoundingBoxOverlay(GraphicOverlay overlay, List<DetectionResult> detections) {
+    public BoundingBoxOverlay(GraphicOverlay overlay, List<DetectionResult> detections, ImageMetadata imageMetadata) {
         super(overlay);
 
 
         this.detections = detections;
+        this.imageMetadata = imageMetadata;
 
         // Paint for the boxes
         paint = new Paint();
@@ -54,8 +56,8 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        int originalWidth = overlay.getImageWidth();
-        int originalHeight = overlay.getImageHeight();
+        int originalWidth =  imageMetadata.getWidth();
+        int originalHeight = imageMetadata.getHeight();
 
         Log.d("Draw", "draw: " + originalWidth + " " + originalHeight + " " + canvasWidth + " " + canvasHeight);
 

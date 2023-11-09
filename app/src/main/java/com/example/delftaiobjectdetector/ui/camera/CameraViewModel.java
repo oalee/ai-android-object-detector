@@ -26,6 +26,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.delftaiobjectdetector.core.camera.CameraManager;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 import com.example.delftaiobjectdetector.core.data.source.AppRepository;
 import com.example.delftaiobjectdetector.core.ml.MLUtils;
 import com.example.delftaiobjectdetector.core.utils.SizeManager;
@@ -58,6 +59,10 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
     private MutableLiveData<Integer> mRotationDegrees = new MutableLiveData<>();
 
     public LiveData<Integer> rotationDegrees = mRotationDegrees;
+
+    private MutableLiveData<ImageMetadata> mImageMetadata = new MutableLiveData<>();
+
+    public LiveData<ImageMetadata> imageMetadata = mImageMetadata;
 
 
     private CameraManager cameraManager;
@@ -156,9 +161,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 
 
         ImageCapture.OutputFileOptions outputFileOptions =
-                new ImageCapture.OutputFileOptions.Builder(
-                        file
-                ).
+                new ImageCapture.OutputFileOptions.Builder(file).
                         build();
 
         cameraController.takePicture(
@@ -230,10 +233,11 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
     public void detectObjects(ImageProxy imageProxy, MLUtils.MLTaskListener listener) {
         mlUtils.detectObjects(imageProxy, new MLUtils.MLTaskListener() {
             @Override
-            public void onMLTaskCompleted(List<DetectionResult> results) {
+            public void onMLTaskCompleted(List<DetectionResult> results, ImageMetadata imageMetadata) {
+                mImageMetadata.postValue(imageMetadata);
 
                 mDetectionResults.postValue(results);
-                listener.onMLTaskCompleted(results);
+                listener.onMLTaskCompleted(results, imageMetadata);
             }
 
             @Override
@@ -245,7 +249,8 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
     }
 
     @Override
-    public void onMLTaskCompleted(List<DetectionResult> results) {
+    public void onMLTaskCompleted(List<DetectionResult> results, ImageMetadata imageMetadata) {
+        mImageMetadata.postValue(imageMetadata);
         mDetectionResults.postValue(results);
     }
 
@@ -306,14 +311,13 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         Executors.newSingleThreadExecutor().execute(() -> {
 
             boolean success = file.renameTo(newFile);
-            List<DetectionResult> result = detectionResults.getValue();
+//            List<DetectionResult> result = detectionResults.getValue();
 
-            if (result == null || !success) {
+            if ( !success) {
                 mCameraState.postValue(CameraState.ERROR_SAVE_IMAGE);
                 return;
             }
             mSavedImageName.postValue(newFileName);
-            appRepository.insertResults(result, newFileName);
 
 
             mlUtils.detectObjects(Uri.fromFile(
@@ -321,9 +325,11 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
             ),
             new MLUtils.MLTaskListener() {
                         @Override
-                        public void onMLTaskCompleted(List<DetectionResult> results) {
-
+                        public void onMLTaskCompleted(List<DetectionResult> results, ImageMetadata imageMetadata ) {
+                            mImageMetadata.postValue(imageMetadata);
                             mDetectionResults.postValue(results);
+                            appRepository.insertResults(results, newFileName,  imageMetadata);
+
                             mCameraState.postValue(CameraState.SAVE_IMAGE_SUCCESS);
                         }
 

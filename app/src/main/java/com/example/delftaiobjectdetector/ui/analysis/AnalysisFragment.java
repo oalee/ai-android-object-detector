@@ -58,22 +58,23 @@ public class AnalysisFragment extends Fragment {
 //        );
         binding.capturedImageView.setImageURI(Uri.fromFile(newFile));
 
-        mViewModel.getDetectionResults(imagePath).observe(getViewLifecycleOwner(), detectionResults -> {
-            if (detectionResults == null) {
-                return;
-            }
-            binding.analysisRecyclerView.setAdapter(new DetectedItemsAdapter(detectionResults, mViewModel.getImageManager()));
 
-            LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
-            binding.analysisRecyclerView.setLayoutManager(layoutManager);
+        mViewModel.loadData(imagePath);
 
-//            overlay
-            BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, detectionResults);
-            binding.overlay.add(overlay);
-        });
+        mViewModel.getCombinedImageMetadataMutableLiveData().observe(
+                getViewLifecycleOwner(), combinedImageMetadata -> {
+                    if (combinedImageMetadata == null) {
+                        return;
+                    }
+                    binding.analysisRecyclerView.setAdapter(new DetectedItemsAdapter(combinedImageMetadata.getDetectionResults(), combinedImageMetadata.getImageMetadata(), mViewModel.getImageManager()));
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
+                    binding.analysisRecyclerView.setLayoutManager(layoutManager);
 
-
-
+                    binding.overlay.clear();
+                    BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, combinedImageMetadata.getDetectionResults(), combinedImageMetadata.getImageMetadata());
+                    binding.overlay.add(overlay);
+                }
+        );
 
 
         return binding.getRoot();

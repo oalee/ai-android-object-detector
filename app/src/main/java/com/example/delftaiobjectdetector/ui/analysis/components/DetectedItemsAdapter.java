@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 import com.example.delftaiobjectdetector.core.utils.ImageManager;
 import com.example.delftaiobjectdetector.databinding.ItemDetectedBinding;
 
@@ -19,13 +20,15 @@ import java.util.List;
 public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdapter.ViewHolder> {
 
     private final ImageManager imageManager;
+    private final ImageMetadata imageMetadata;
     private
     List<DetectionResult> detectionResults;
 
-    public DetectedItemsAdapter(List<DetectionResult> detectionResults, ImageManager imageManager) {
+    public DetectedItemsAdapter(List<DetectionResult> detectionResults, ImageMetadata imageMetadata, ImageManager imageManager) {
 
         this.detectionResults = detectionResults;
         this.imageManager = imageManager;
+        this.imageMetadata = imageMetadata;
 
     }
 
@@ -81,7 +84,7 @@ public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdap
 
 
 
-            imageManager.loadImage(detectionResult.getImageName(), detectionResult.getBoundingBox(), binding.detectedItemImageView);
+            imageManager.loadImage(detectionResult.getImageName(), detectionResult, imageMetadata, binding.detectedItemImageView);
 
 //            binding.de.setText(String.valueOf(detectionResult.getConfidence()));
         }

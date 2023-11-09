@@ -6,11 +6,26 @@ import androidx.room.Insert;
 import androidx.room.Query;
 
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 
 import java.util.List;
 
 @Dao
 public interface AppDao {
+
+//    write queries for ImageMetadata
+//    get all
+
+    @Query("SELECT * FROM image_metadata")
+    List<ImageMetadata> getAllImageMetaData();
+
+    @Query("SELECT * FROM image_metadata WHERE image_name = :imageName")
+    ImageMetadata getByImageName(String imageName);
+
+    @Insert
+    long insert(ImageMetadata imageMetadata);
+
+
     @Query("SELECT * FROM detections")
     List<DetectionResult>  getAll();
 

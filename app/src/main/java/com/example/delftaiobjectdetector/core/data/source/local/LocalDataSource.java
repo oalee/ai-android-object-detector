@@ -1,6 +1,7 @@
 package com.example.delftaiobjectdetector.core.data.source.local;
 
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 import com.example.delftaiobjectdetector.core.data.source.local.db.AppDatabase;
 import com.example.delftaiobjectdetector.core.di.DatabaseModule;
 
@@ -56,5 +57,17 @@ public class LocalDataSource {
 
     public List<DetectionResult> getAll() {
         return appDatabase.appDao().getAll();
+    }
+
+    public void insertImageMetadata(ImageMetadata imageMetadata) {
+        appDatabase.appDao().insert(imageMetadata);
+    }
+
+    public List<ImageMetadata> getAllImageMetaData() {
+        return appDatabase.appDao().getAllImageMetaData();
+    }
+
+    public ImageMetadata getByImageName(String imageName) {
+        return appDatabase.appDao().getByImageName(imageName);
     }
 }

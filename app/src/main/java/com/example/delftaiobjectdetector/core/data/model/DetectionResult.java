@@ -1,6 +1,7 @@
 package com.example.delftaiobjectdetector.core.data.model;
 
 import android.graphics.RectF;
+import android.util.Size;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
@@ -9,7 +10,7 @@ import androidx.room.PrimaryKey;
 
 
 @Entity(tableName = "detections")
-public class DetectionResult  {
+public class DetectionResult {
 
     @PrimaryKey(autoGenerate = true)
     public long id;
@@ -17,8 +18,12 @@ public class DetectionResult  {
     @ColumnInfo(name = "category")
     String categoryAsString;
 
-    @ColumnInfo(name = "bounding_box")
-    RectF boundingBox;
+    @ColumnInfo(name = "scaled_bounding_box")
+    public RectF scaledBoundingBox;
+
+    @ColumnInfo(name = "original_box")
+    public RectF originalBox;
+
 
     @ColumnInfo(name = "score")
     float scoreAsFloat;
@@ -26,10 +31,12 @@ public class DetectionResult  {
     @ColumnInfo(name = "image_path")
     String imageName;
 
-    public DetectionResult(@NonNull String categoryAsString, RectF boundingBox, @NonNull float scoreAsFloat) {
+    public DetectionResult(@NonNull String categoryAsString, RectF scaledBoundingBox, RectF originalBox,   @NonNull float scoreAsFloat) {
         this.categoryAsString = categoryAsString;
-        this.boundingBox = boundingBox;
         this.scoreAsFloat = scoreAsFloat;
+        this.scaledBoundingBox = scaledBoundingBox;
+        this.originalBox = originalBox;
+
     }
 
     public String getCategoryAsString() {
@@ -45,12 +52,10 @@ public class DetectionResult  {
     }
 
     public RectF getBoundingBox() {
-        return boundingBox;
+        return scaledBoundingBox;
     }
 
-    public void setBoundingBox(RectF boundingBox) {
-        this.boundingBox = boundingBox;
-    }
+
 
     public void setImageName(String imageName) {
         this.imageName = imageName;
@@ -70,5 +75,21 @@ public class DetectionResult  {
 
     public long getId() {
         return id;
+    }
+
+    public RectF getOriginalBox() {
+        return originalBox;
+    }
+
+    public void setOriginalBox(RectF originalBox) {
+        this.originalBox = originalBox;
+    }
+
+    public void setScaledBoundingBox(RectF scaledBoundingBox) {
+        this.scaledBoundingBox = scaledBoundingBox;
+    }
+
+    public RectF getScaledBoundingBox() {
+        return scaledBoundingBox;
     }
 }

@@ -2,19 +2,8 @@ package com.example.delftaiobjectdetector.ui.camera;
 
 import static androidx.navigation.fragment.FragmentKt.findNavController;
 
-import androidx.annotation.OptIn;
-import androidx.camera.core.CameraSelector;
-import androidx.camera.core.ExperimentalGetImage;
-import androidx.camera.core.ImageAnalysis;
-import androidx.camera.core.ImageCapture;
-import androidx.camera.core.ImageCaptureException;
-import androidx.camera.core.ImageProxy;
-import androidx.camera.view.CameraController;
-import androidx.camera.view.LifecycleCameraController;
-import androidx.camera.view.PreviewView;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -23,25 +12,19 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
-import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
-import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
-import com.example.delftaiobjectdetector.core.ml.MLUtils;
 import com.example.delftaiobjectdetector.core.utils.SizeManager;
 import com.example.delftaiobjectdetector.databinding.FragmentCameraBinding;
 import com.example.delftaiobjectdetector.ui.camera.components.BoundingBoxOverlay;
-import com.google.mlkit.vision.common.InputImage;
 
 import java.io.File;
 import java.util.List;
-import java.util.concurrent.Executors;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -294,7 +277,7 @@ public class CameraFragment extends Fragment {
         }
 
 
-        BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, results);
+        BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, results, mViewModel.imageMetadata.getValue());
         binding.overlay.clear();
         binding.overlay.setVisibility(View.VISIBLE);
         binding.overlay.add(overlay);
