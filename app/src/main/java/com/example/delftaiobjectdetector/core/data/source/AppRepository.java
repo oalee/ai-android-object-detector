@@ -37,9 +37,9 @@ public class AppRepository {
     public void insertResults(List<DetectionResult> detectionResults, String imagePath) {
 
 //        run on background thread
-        Executors.newSingleThreadExecutor().execute(() -> {
+
             localDataSource.insertAll(detectionResults, imagePath);
-        });
+
 //        localDataSource.insertAll(detectionResults, imagePath);
     }
 

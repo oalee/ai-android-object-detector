@@ -56,7 +56,9 @@ public class CameraFragment extends Fragment {
         super.onResume();
 
 //        if state is not Captured, bind camera
-        if (mViewModel.cameraState.getValue() == CameraState.CAPTURED) {
+        CameraState state = mViewModel.cameraState.getValue();
+        if (state == CameraState.CAPTURED || state == CameraState.SAVE_IMAGE_SUCCESS) {
+
           mViewModel.restartCamera(this);
         }
 //        log state
@@ -104,6 +106,12 @@ public class CameraFragment extends Fragment {
                         binding.capturedImageView.setAlpha(1f);
 
 
+                    } else if (cameraState == CameraState.SAVE_IMAGE_SUCCESS) {
+
+                        String newFileName = mViewModel.savedImageName.getValue();
+                        CameraFragmentDirections.ActionCameraFragmentToAnalysisFragment action = CameraFragmentDirections.actionCameraFragmentToAnalysisFragment(newFileName);
+                        findNavController(this).navigate(action);
+                        mViewModel.onNavigatedToResult();
                     }
                 }
         );
@@ -123,26 +131,8 @@ public class CameraFragment extends Fragment {
                         return;
                     }
 
+                    mViewModel.performSave();
 
-                    String fileName = "temp.jpg";
-
-                    File file = new File(requireContext().getFilesDir(), fileName);
-
-                    String newFileName = System.currentTimeMillis() + ".jpg";
-
-                    File newFile = new File(requireContext().getFilesDir(), newFileName);
-
-                    boolean success = file.renameTo(newFile);
-
-                    List<DetectionResult> result = mViewModel.detectionResults.getValue();
-
-                    if (result != null) {
-
-                        CameraFragmentDirections.ActionCameraFragmentToAnalysisFragment action = CameraFragmentDirections.actionCameraFragmentToAnalysisFragment(newFileName);
-                        mViewModel.insertResults(result, newFileName);
-                        Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show();
-                        findNavController(this).navigate(action);
-                    }
 
                 }
         );

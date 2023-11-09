@@ -1,5 +1,7 @@
 package com.example.delftaiobjectdetector.ui.camera;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
@@ -44,6 +46,10 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
     private MutableLiveData<CameraState> mCameraState = new MutableLiveData<>(CameraState.STREAMING);
 
     public LiveData<CameraState> cameraState = mCameraState;
+
+    private MutableLiveData<String> mSavedImageName = new MutableLiveData<>();
+
+    public LiveData<String> savedImageName = mSavedImageName;
 
 
     private CameraManager cameraManager;
@@ -156,9 +162,6 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         return cameraManager.getCameraController();
     }
 
-    public void insertResults(List<DetectionResult> detectionResults, String imagePath) {
-        appRepository.insertResults(detectionResults, imagePath);
-    }
 
     public MLUtils getMlUtils() {
         return mlUtils;
@@ -197,10 +200,6 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 
     public void restartCamera(LifecycleOwner owner) {
 
-//        only restart when state is captured
-        if (cameraState.getValue() != CameraState.CAPTURED) {
-            return;
-        }
 
         mCameraState.postValue(
                 CameraState.RESTARTING
@@ -238,6 +237,37 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         );
     }
 
+    public void performSave(){
+
+        mCameraState.postValue(CameraState.SAVING_IMAGE_RESULT);
+
+        String fileName = "temp.jpg";
+        File file = new File(context.getFilesDir(), fileName);
+        String newFileName = System.currentTimeMillis() + ".jpg";
+        File newFile = new File(context.getFilesDir(), newFileName);
+
+//        run on a executor background thread
+        Executors.newSingleThreadExecutor().execute(() -> {
+
+            boolean success = file.renameTo(newFile);
+            List<DetectionResult> result = detectionResults.getValue();
+
+            if (result == null || !success) {
+                mCameraState.postValue(CameraState.ERROR_SAVE_IMAGE);
+                return;
+            }
+            mSavedImageName.postValue(newFileName);
+            appRepository.insertResults(result, newFileName);
+            mCameraState.postValue(CameraState.SAVE_IMAGE_SUCCESS);
+
+
+        });
+
+    }
+
+    public void onNavigatedToResult(){
+        mCameraState.postValue(CameraState.CAPTURED);
+    }
 
     //     enum class camera state
 
