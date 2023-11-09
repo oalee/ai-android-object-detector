@@ -57,7 +57,7 @@ public class HomeFragment extends Fragment {
                         requireActivity(), R.id.nav_host_fragment_container
                 );
 
-                navController.navigate(R.id.action_homeFragment_to_cameraFragment);
+//                navController.navigate(R.id.action_homeFragment_to_cameraFragment);
             }
         });
 

@@ -115,8 +115,6 @@ public class MLUtils implements DefaultLifecycleObserver {
             ExifInterface ei = new ExifInterface(imageUri.getPath());
             orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_UNDEFINED);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -251,8 +249,25 @@ public class MLUtils implements DefaultLifecycleObserver {
 //        int rotation = srcImage.getImageInfo().getRotationDegrees();
 //
 //        originalBitmap = rotateImage(originalBitmap, rotation);
-
-
+//
+//        switch (rotation) {
+//
+//            case 90:
+//                originalBitmap = rotateImage(originalBitmap, 0);
+//                break;
+//
+//            case 180:
+//                originalBitmap = rotateImage(originalBitmap, 180);
+//                break;
+//
+//            case 270:
+//                originalBitmap = rotateImage(originalBitmap, 270);
+//                break;
+//
+//            case ExifInterface.ORIENTATION_NORMAL:
+//            default:
+//                originalBitmap = originalBitmap;
+//        }
         // Store the original dimensions
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();

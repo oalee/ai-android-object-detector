@@ -169,32 +169,34 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                         Log.d("CameraFragment", "onImageSaved: " + file.getAbsolutePath());
 
-                        Uri savedUri = outputFileResults.getSavedUri(); // Get the Uri of the saved file
-                        String filePath = savedUri.getPath(); // Convert Uri to file path if needed
-
-                        try {
-                            ExifInterface exif = new ExifInterface(filePath);
-
-//                            for orientation 0 save 90
-
-                            int degrees = rotationDegrees.getValue();
-                            Log.d("CameraFragment", "onImageSaved: " + degrees);
-                            if (degrees == 0) {
-                                exif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_90));
-                                exif.saveAttributes();
-
-                            }
-                            if (degrees == 180) {
-                                exif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_270));
-                                exif.saveAttributes();
-
-                            }
-                            // Set the orientation tag to rotate 90 degrees
-
-                            Log.d("CameraFragment", "EXIF metadata updated with portrait orientation.");
-                        } catch (IOException e) {
-                            Log.e("CameraFragment", "Failed to update EXIF metadata", e);
-                        }
+//                        Uri savedUri = outputFileResults.getSavedUri(); // Get the Uri of the saved file
+//                        String filePath = savedUri.getPath(); // Convert Uri to file path if needed
+//
+//
+//
+//                        try {
+//                            ExifInterface exif = new ExifInterface(filePath);
+//
+////                            for orientation 0 save 90
+//
+//                            int degrees = rotationDegrees.getValue();
+//                            Log.d("CameraFragment", "onImageSaved: " + degrees);
+//                            if (degrees == 0) {
+//                                exif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_90));
+//                                exif.saveAttributes();
+//
+//                            }
+//                            if (degrees == 180) {
+//                                exif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_270));
+//                                exif.saveAttributes();
+//
+//                            }
+//                            // Set the orientation tag to rotate 90 degrees
+//
+//                            Log.d("CameraFragment", "EXIF metadata updated with portrait orientation.");
+//                        } catch (IOException e) {
+//                            Log.e("CameraFragment", "Failed to update EXIF metadata", e);
+//                        }
                         mCameraState.postValue(CameraState.CAPTURED);
 //                        release camera for now
 //                        Integer rotationDegrees =  outputFileResults.getSavedImage().getImageInfo().getRotationDegrees();
@@ -312,7 +314,25 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
             }
             mSavedImageName.postValue(newFileName);
             appRepository.insertResults(result, newFileName);
-            mCameraState.postValue(CameraState.SAVE_IMAGE_SUCCESS);
+
+
+            mlUtils.detectObjects(Uri.fromFile(
+                    newFile
+            ),
+            new MLUtils.MLTaskListener() {
+                        @Override
+                        public void onMLTaskCompleted(List<DetectionResult> results) {
+
+                            mDetectionResults.postValue(results);
+                            mCameraState.postValue(CameraState.SAVE_IMAGE_SUCCESS);
+                        }
+
+                        @Override
+                        public void onMLTaskFailed() {
+
+                        }
+            }
+                    );
 
 
         });

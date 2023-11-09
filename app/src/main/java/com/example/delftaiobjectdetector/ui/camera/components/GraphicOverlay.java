@@ -3,6 +3,7 @@ package com.example.delftaiobjectdetector.ui.camera.components;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.util.Size;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -13,6 +14,9 @@ public class GraphicOverlay extends View {
     private final List<Graphic> graphics = new ArrayList<>();
 
     public float parentRotation = 90;
+
+    private int imageWidth = 480;
+    private int imageHeight = 640;
 
 
 
@@ -54,6 +58,36 @@ public class GraphicOverlay extends View {
                 graphic.draw(canvas);
             }
         }
+    }
+
+    public int getImageWidth() {
+        return imageWidth;
+    }
+
+    public void setImageWidth(int imageWidth) {
+        this.imageWidth = imageWidth;
+    }
+
+    public int getImageHeight() {
+        return imageHeight;
+    }
+
+    public void setImageHeight(int imageHeight) {
+        this.imageHeight = imageHeight;
+    }
+
+    public void setImageSize(Size imageSize) {
+
+//        if width > height set 640
+
+        if (imageSize.getWidth() > imageSize.getHeight()) {
+            this.imageWidth = 640;
+            this.imageHeight = 480;
+            return;
+        }
+
+//        this.imageWidth = imageSize.getWidth();
+//        this.imageHeight = imageSize.getHeight();
     }
 
     // Abstract class for creating graphics (bounding boxes, labels, etc.)

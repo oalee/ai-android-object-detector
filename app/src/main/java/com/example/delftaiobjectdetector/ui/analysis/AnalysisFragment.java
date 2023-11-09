@@ -42,6 +42,20 @@ public class AnalysisFragment extends Fragment {
 
         File newFile = new File(requireContext().getFilesDir(), imagePath);
 
+        mViewModel.getSizeManager().setCameraHeightBasedOnImageSize(
+                binding.capturedImageView, Uri.fromFile(newFile)
+        );
+
+
+        binding.overlay.setImageSize(
+                mViewModel.getSizeManager().getImageSize(
+                        Uri.fromFile(newFile)
+                )
+        );
+
+        mViewModel.getSizeManager().setCameraHeightBasedOnImageSize(
+                binding.overlay, Uri.fromFile(newFile)
+        );
         binding.capturedImageView.setImageURI(Uri.fromFile(newFile));
 
         mViewModel.getDetectionResults(imagePath).observe(getViewLifecycleOwner(), detectionResults -> {
@@ -58,9 +72,9 @@ public class AnalysisFragment extends Fragment {
             binding.overlay.add(overlay);
         });
 
-        mViewModel.getSizeManager().setCameraHeightPortraitPreview(
-                binding.capturedImageView
-        );
+
+
+
 
         return binding.getRoot();
     }

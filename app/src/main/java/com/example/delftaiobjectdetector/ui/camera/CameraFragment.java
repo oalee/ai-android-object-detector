@@ -151,6 +151,14 @@ public class CameraFragment extends Fragment {
                 }
         );
 
+        binding.galleryButton.setOnClickListener(
+                v -> {
+
+                    findNavController(this).navigate( CameraFragmentDirections.actionCameraFragmentToGalleryFragment());
+
+                }
+        );
+
         binding.captureButton.setOnClickListener(v -> {
 
 //            log state

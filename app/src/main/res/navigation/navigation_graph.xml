@@ -6,16 +6,6 @@
     app:startDestination="@id/cameraFragment">
 
     <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.example.delftaiobjectdetector.ui.home.HomeFragment"
-        android:label="HomeFragment" >
-        <action
-            android:id="@+id/action_homeFragment_to_cameraFragment"
-            app:destination="@id/cameraFragment"
-            app:launchSingleTop="true" />
-    </fragment>
-
-    <fragment
         android:id="@+id/cameraFragment"
         android:name="com.example.delftaiobjectdetector.ui.camera.CameraFragment"
         android:label="CameraFragment" >
@@ -26,6 +16,9 @@
                 android:name="imageUri"
                 app:argType="java.lang.String" />
         </action>
+        <action
+            android:id="@+id/action_cameraFragment_to_galleryFragment"
+            app:destination="@id/galleryFragment" />
     </fragment>
     <fragment
         android:id="@+id/analysisFragment"
@@ -37,4 +30,9 @@
             android:name="imageUri"
             app:argType="java.lang.String" />
     </fragment>
+    <fragment
+        android:id="@+id/galleryFragment"
+        android:name="com.example.delftaiobjectdetector.ui.gallery.GalleryFragment"
+        android:label="fragment_gallery"
+        tools:layout="@layout/fragment_gallery" />
 </navigation>

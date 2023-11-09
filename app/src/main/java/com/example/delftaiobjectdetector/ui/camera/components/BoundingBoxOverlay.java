@@ -54,8 +54,10 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
-        int originalWidth = 480;
-        int originalHeight = 640;
+        int originalWidth = overlay.getImageWidth();
+        int originalHeight = overlay.getImageHeight();
+
+        Log.d("Draw", "draw: " + originalWidth + " " + originalHeight + " " + canvasWidth + " " + canvasHeight);
 
 
         if (rotation != 90) {
