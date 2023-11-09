@@ -1,5 +1,6 @@
 package com.example.delftaiobjectdetector.ui.analysis.components;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,18 +10,22 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
+import com.example.delftaiobjectdetector.core.utils.ImageManager;
 import com.example.delftaiobjectdetector.databinding.ItemDetectedBinding;
 
+import java.io.File;
 import java.util.List;
 
 public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdapter.ViewHolder> {
 
+    private final ImageManager imageManager;
     private
     List<DetectionResult> detectionResults;
 
-    public DetectedItemsAdapter(List<DetectionResult> detectionResults) {
+    public DetectedItemsAdapter(List<DetectionResult> detectionResults, ImageManager imageManager) {
 
         this.detectionResults = detectionResults;
+        this.imageManager = imageManager;
 
     }
 
@@ -37,12 +42,12 @@ public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdap
     public void onBindViewHolder(@NonNull DetectedItemsAdapter.ViewHolder holder, int position) {
 
         DetectionResult detectionResult = detectionResults.get(position);
-        holder.setDetectionResult(detectionResult);
+        holder.setDetectionResult(detectionResult, imageManager);
     }
 
     @Override
     public int getItemCount() {
-        return  detectionResults.size();
+        return detectionResults.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -58,7 +63,7 @@ public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdap
         }
 
 
-        public void setDetectionResult(DetectionResult detectionResult) {
+        public void setDetectionResult(DetectionResult detectionResult, ImageManager imageManager) {
 
             String category = detectionResult.getCategoryAsString();
 //            capitalize first letter
@@ -67,12 +72,16 @@ public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdap
             float confidence = detectionResult.getScoreAsFloat();
 
 //            join category and confidence, e.g. "Person (0.99)"
-            String name = category ;
+            String name = category;
 
-            binding.detectedItemTextView.setText( name);
+            binding.detectedItemTextView.setText(name);
 
 //            2 decimal places
-            binding.confidenceTextView.setText("Confidence:" + String.format("%.2f", confidence));
+            binding.confidenceTextView.setText("Confidence: " + String.format("%.2f", confidence));
+
+
+
+            imageManager.loadImage(detectionResult.getImageName(), detectionResult.getBoundingBox(), binding.detectedItemImageView);
 
 //            binding.de.setText(String.valueOf(detectionResult.getConfidence()));
         }

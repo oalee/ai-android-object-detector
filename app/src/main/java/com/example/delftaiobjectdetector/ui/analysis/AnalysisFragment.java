@@ -62,7 +62,7 @@ public class AnalysisFragment extends Fragment {
             if (detectionResults == null) {
                 return;
             }
-            binding.analysisRecyclerView.setAdapter(new DetectedItemsAdapter(detectionResults));
+            binding.analysisRecyclerView.setAdapter(new DetectedItemsAdapter(detectionResults, mViewModel.getImageManager()));
 
             LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
             binding.analysisRecyclerView.setLayoutManager(layoutManager);
