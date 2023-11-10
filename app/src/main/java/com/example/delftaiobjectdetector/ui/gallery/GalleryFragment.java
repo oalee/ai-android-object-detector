@@ -49,7 +49,6 @@ public class GalleryFragment extends Fragment {
                 new GridLayoutManager(getContext(), 2, GridLayoutManager.VERTICAL, false)
         );
         mViewModel.getDetectionResults().observe(getViewLifecycleOwner(), detectionResults -> {
-            binding.textView.setVisibility(detectionResults.isEmpty() ? View.VISIBLE : View.GONE);
 
             binding.galleryRecyclerView.setAdapter(new GalleryAdapter(detectionResults, (imagePath, imageView) -> {
                 GalleryFragmentDirections.ActionGalleryFragmentToAnalysisFragment action =

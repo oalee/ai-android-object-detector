@@ -117,6 +117,40 @@ public class CameraFragment extends Fragment {
                 }
         );
 
+        mViewModel.shouldGalleryBeEnabled.observe(
+                getViewLifecycleOwner(),
+                shouldGalleryBeEnabled -> {
+                    if (shouldGalleryBeEnabled) {
+
+//                        alpha 1
+                        binding.galleryButton.setVisibility(View.VISIBLE);
+//                        if alpha is 0.4, then animate to 1
+                        if (binding.galleryButton.getAlpha() == 0.4f) {
+                            binding.galleryButton.animate()
+                                    .alpha(1f)
+                                    .setDuration(200)
+                                    .start();
+
+
+                        }
+                        binding.galleryButton.setOnClickListener(
+                                v -> {
+                                    findNavController(this).navigate(CameraFragmentDirections.actionCameraFragmentToGalleryFragment());
+
+                                }
+                        );
+                    } else {
+
+//                        alpha 0.4
+
+                        binding.galleryButton.animate()
+                                .alpha(0.4f)
+                                .setDuration(200)
+                                .start();
+                    }
+                }
+        );
+
         mViewModel.detectionResults.observe(
                 getViewLifecycleOwner(),
                 detectionResults -> {
@@ -150,13 +184,7 @@ public class CameraFragment extends Fragment {
                 }
         );
 
-        binding.galleryButton.setOnClickListener(
-                v -> {
 
-                    findNavController(this).navigate(CameraFragmentDirections.actionCameraFragmentToGalleryFragment());
-
-                }
-        );
 
         binding.captureButton.setOnClickListener(v -> {
 

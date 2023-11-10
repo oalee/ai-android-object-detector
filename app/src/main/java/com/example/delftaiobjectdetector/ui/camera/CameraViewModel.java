@@ -65,6 +65,11 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 
     public LiveData<ImageMetadata> imageMetadata = mImageMetadata;
 
+//    should gallery be enabled live data
+    private MutableLiveData<Boolean> mShouldGalleryBeEnabled = new MutableLiveData<>();
+
+    public LiveData<Boolean> shouldGalleryBeEnabled = mShouldGalleryBeEnabled;
+
 
     private CameraManager cameraManager;
 
@@ -89,6 +94,14 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         this.appRepository = appRepository;
         this.mlUtils = mlUtils;
         this.context = context;
+
+//        run on background thread
+        Executors.newSingleThreadExecutor().execute(() -> {
+            mShouldGalleryBeEnabled.postValue(
+                    appRepository.getImages().size() > 0
+            );
+
+        });
 
     }
 
@@ -299,6 +312,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         );
     }
 
+
     public void performSave() {
 
         mCameraState.postValue(CameraState.SAVING_IMAGE_RESULT);
@@ -327,11 +341,13 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
             new MLUtils.MLTaskListener() {
                         @Override
                         public void onMLTaskCompleted(List<DetectionResult> results, ImageMetadata imageMetadata ) {
+                            mShouldGalleryBeEnabled.postValue(true);
                             mImageMetadata.postValue(imageMetadata);
                             mDetectionResults.postValue(results);
                             appRepository.insertResults(results, newFileName,  imageMetadata);
-
                             mCameraState.postValue(CameraState.SAVE_IMAGE_SUCCESS);
+
+
                         }
 
                         @Override

@@ -3,6 +3,7 @@ package com.example.delftaiobjectdetector.ui.gallery.components;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -86,19 +87,20 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
 
             binding.imageView.setTransitionName(imageName);
 
+            View.OnClickListener onClickListener = v -> {
 
-            binding.getRoot().setOnClickListener(v -> {
-                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName, binding.imageView);
-            });
-//            binding.graphicOverlay.setOnClickListener(v -> {
-//                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
-//            });
-            binding.imageView.setOnClickListener(v -> {
-                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName, binding.imageView);
-            });
-            binding.moreImageView.setOnClickListener(v -> {
-                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName, binding.imageView);
-            });
+                binding.moreImageView.setRotation(-90);
+
+                    // Navigate to the next fragment after the animation has completed
+                    onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName, binding.imageView);
+
+            };
+
+
+            binding.getRoot().setOnClickListener(onClickListener);
+
+            binding.imageView.setOnClickListener(onClickListener);
+            binding.moreImageView.setOnClickListener(onClickListener);
 
         }
 

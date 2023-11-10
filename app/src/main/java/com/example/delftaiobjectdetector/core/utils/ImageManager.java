@@ -119,8 +119,14 @@ public class ImageManager {
         }
 
         try {
+
+//            set options to ARGB_8888 to avoid OutOfMemoryError
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+
             InputStream inputStream = context.getContentResolver().openInputStream(source);
-            Bitmap value = BitmapFactory.decodeStream(inputStream);
+            Bitmap value = BitmapFactory.decodeStream(inputStream, null, options);
             addBitmapToMemoryCache(key, value);
             return value;
         } catch (FileNotFoundException e) {
