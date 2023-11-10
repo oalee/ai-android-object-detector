@@ -245,10 +245,12 @@ public class MLUtils implements DefaultLifecycleObserver {
 
 //           rotate image
         int rotation = srcImage.getImageInfo().getRotationDegrees();
-//
+
 //        originalBitmap = rotateImage(originalBitmap, rotation);
 //
 //        switch (rotation) {
+//
+//
 //
 //            case 90:
 //                originalBitmap = rotateImage(originalBitmap, 0);
@@ -269,6 +271,13 @@ public class MLUtils implements DefaultLifecycleObserver {
         // Store the original dimensions
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();
+
+//        dependeing on orientation, rotate image, that is, if lanscape, swap width and height
+
+        if (rotation == 0 || rotation == 180) {
+            originalWidth = originalBitmap.getHeight();
+            originalHeight = originalBitmap.getWidth();
+        }
 
 //        log this
         Log.d("MLUtils", "detectObjects: Original Image Size " + originalWidth + " " + originalHeight);

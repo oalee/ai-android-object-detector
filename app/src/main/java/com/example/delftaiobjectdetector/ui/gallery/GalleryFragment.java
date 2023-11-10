@@ -9,6 +9,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.view.LayoutInflater;
@@ -37,7 +38,9 @@ public class GalleryFragment extends Fragment {
         FragmentGalleryBinding binding = FragmentGalleryBinding.inflate(inflater, container, false);
 
         mViewModel = new ViewModelProvider(this).get(GalleryViewModel.class);
-
+        binding.galleryRecyclerView.setLayoutManager(
+                new GridLayoutManager(getContext(), 2, GridLayoutManager.VERTICAL, false)
+        );
         mViewModel.getDetectionResults().observe(getViewLifecycleOwner(), detectionResults -> {
             binding.textView.setVisibility(detectionResults.isEmpty() ? View.VISIBLE : View.GONE);
 
@@ -47,13 +50,9 @@ public class GalleryFragment extends Fragment {
 
                 findNavController(this).navigate(action);
 
-            }));
+            },  mViewModel.getSizeManager()) );
 //            set staggered grid layout manager
-            binding.galleryRecyclerView.setLayoutManager(
-                    new StaggeredGridLayoutManager(
-                            2, StaggeredGridLayoutManager.VERTICAL
-                    )
-            );
+
         });
 
         return binding.getRoot();

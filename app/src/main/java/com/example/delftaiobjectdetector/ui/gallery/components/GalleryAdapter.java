@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DecodeFormat;
 import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.core.utils.SizeManager;
@@ -21,12 +22,14 @@ import javax.inject.Inject;
 
 public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHolder> {
     private final OnClickToNavigateToAnalysisFragment onClickToNavigateToAnalysisFragment;
+    private final SizeManager sizeManager;
     private List<List<DetectionResult>> detectionResults;
 
-    public GalleryAdapter(List<List<DetectionResult>> detectionResults, OnClickToNavigateToAnalysisFragment onClickToNavigateToAnalysisFragment) {
+    public GalleryAdapter(List<List<DetectionResult>> detectionResults, OnClickToNavigateToAnalysisFragment onClickToNavigateToAnalysisFragment, SizeManager sizeManager) {
 
         this.detectionResults = detectionResults;
         this.onClickToNavigateToAnalysisFragment = onClickToNavigateToAnalysisFragment;
+        this.sizeManager = sizeManager;
     }
 
 
@@ -56,8 +59,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
 
         public ItemGalleryBinding binding;
 
-        @Inject
-        SizeManager sizeManager;
+
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -74,8 +76,10 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
 
             File newFile = new File(binding.getRoot().getContext().getFilesDir(), imageName);
 
-            Glide.with(binding.getRoot().getContext())
+            Glide.with(binding.imageView)
                     .load(newFile)
+                    .override((int) (sizeManager.getWidth() * 0.4f)) // use the actual width and height in pixels, or calculate the size
+                    .format(DecodeFormat.PREFER_RGB_565)
                     .into(binding.imageView);
 
 
@@ -87,9 +91,9 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
             binding.getRoot().setOnClickListener(v -> {
                 onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
             });
-            binding.graphicOverlay.setOnClickListener(v -> {
-                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
-            });
+//            binding.graphicOverlay.setOnClickListener(v -> {
+//                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
+//            });
             binding.imageView.setOnClickListener(v -> {
                 onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
             });

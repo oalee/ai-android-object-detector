@@ -60,6 +60,8 @@ public class AnalysisFragment extends Fragment {
 
 
         mViewModel.loadData(imagePath);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
+        binding.analysisRecyclerView.setLayoutManager(layoutManager);
 
         mViewModel.getCombinedImageMetadataMutableLiveData().observe(
                 getViewLifecycleOwner(), combinedImageMetadata -> {
@@ -67,8 +69,6 @@ public class AnalysisFragment extends Fragment {
                         return;
                     }
                     binding.analysisRecyclerView.setAdapter(new DetectedItemsAdapter(combinedImageMetadata.getDetectionResults(), combinedImageMetadata.getImageMetadata(), mViewModel.getImageManager()));
-                    LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
-                    binding.analysisRecyclerView.setLayoutManager(layoutManager);
 
                     binding.overlay.clear();
                     BoundingBoxOverlay overlay = new BoundingBoxOverlay(binding.overlay, combinedImageMetadata.getDetectionResults(), combinedImageMetadata.getImageMetadata());

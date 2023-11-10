@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.core.data.source.AppRepository;
+import com.example.delftaiobjectdetector.core.utils.SizeManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,13 +25,15 @@ public class GalleryViewModel extends ViewModel {
 
 //    live data
     private final MutableLiveData<List<List<DetectionResult>>> detectionResults = new MutableLiveData<>();
-
+    private final SizeManager sizeManager;
 
 
     @Inject
     public GalleryViewModel(
-            AppRepository appRepository
+            AppRepository appRepository,
+            SizeManager sizeManager
     ) {
+        this.sizeManager = sizeManager;
         this.appRepository = appRepository;
         setUpData();
     }
@@ -60,5 +63,9 @@ public class GalleryViewModel extends ViewModel {
     }
     public LiveData<List<List<DetectionResult>>> getDetectionResults() {
         return detectionResults;
+    }
+
+    public SizeManager getSizeManager() {
+        return sizeManager;
     }
 }

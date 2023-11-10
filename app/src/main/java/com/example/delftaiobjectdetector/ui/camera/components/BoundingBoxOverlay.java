@@ -52,7 +52,7 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
     public void draw(Canvas canvas) {
         canvas.save();
 
-        float rotation = overlay.getParentRotation();
+        float rotation = imageMetadata.getRotation();
         int canvasWidth = canvas.getWidth();
         int canvasHeight = canvas.getHeight();
 
@@ -61,27 +61,36 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
 
         Log.d("Draw", "draw: " + originalWidth + " " + originalHeight + " " + canvasWidth + " " + canvasHeight);
 
+        Log.d("Draw", "draw: " + rotation) ;
 
-        if (rotation != 90) {
-            canvas.save(); // Save the canvas state before any manipulation
-
-            // Depending on the rotation, adjust the canvas.
-            // For example, if rotation is 180, rotate the canvas around its center
-            if (rotation == 180) {
-                canvas.rotate(270);
-                canvas.translate(-canvasHeight, 0);
-            } else if (rotation == 270) {
-                // for 270 degrees, rotate and translate to adjust the origin
-                canvas.rotate(180);
-                canvas.translate(-canvasWidth, -canvasHeight);
-            } else if (rotation == 0) {
-
-                canvas.rotate(90);
-                canvas.translate(0, -canvas.getWidth());
-            }
-
-            // Add other conditions if you expect other rotations
-        }
+////
+//        if (rotation == 0 || rotation == 180){
+////            swap og width and height
+//            int temp = originalWidth;
+//            originalWidth = originalHeight;
+//            originalHeight = temp;
+//        }
+//
+//        if (rotation != 90) {
+//            canvas.save(); // Save the canvas state before any manipulation
+//
+//            // Depending on the rotation, adjust the canvas.
+//            // For example, if rotation is 180, rotate the canvas around its center
+//            if (rotation == 180) {
+//                canvas.rotate(270);
+//                canvas.translate(-canvasHeight, 0);
+//            } else if (rotation == 270) {
+//                // for 270 degrees, rotate and translate to adjust the origin
+//                canvas.rotate(180);
+//                canvas.translate(-canvasWidth, -canvasHeight);
+//            } else if (rotation == 0) {
+//
+//                canvas.rotate(90);
+//                canvas.translate(0, -canvasWidth );
+//            }
+//
+//            // Add other conditions if you expect other rotations
+//        }
 
         // If
         for (DetectionResult detection : detections) {
@@ -89,15 +98,7 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
                 // Use a different color for each label
                 paint.setColor(getColorForLabel(detection.getCategoryAsString()));
 
-                RectF rect = detection.getBoundingBox();
-
-
-
-
-//                need to rotate if the image is rotated
-
-
-
+                RectF rect = detection.getScaledBoundingBox();
 
 //                scale rect to canvas width and height
                 float scaleX = (float) canvasWidth / originalWidth;
@@ -125,9 +126,9 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
 
         }
 
-        if (rotation != 90) {
-            canvas.restore(); // Restore the canvas to its original state if we changed it
-        }
+//        if (rotation != 90) {
+//            canvas.restore(); // Restore the canvas to its original state if we changed it
+//        }
     }
 
     // Helper method to assign a color based on the label

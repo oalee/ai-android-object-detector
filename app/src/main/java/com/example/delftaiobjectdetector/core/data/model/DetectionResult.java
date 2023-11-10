@@ -1,7 +1,6 @@
 package com.example.delftaiobjectdetector.core.data.model;
 
 import android.graphics.RectF;
-import android.util.Size;
 
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
@@ -51,9 +50,6 @@ public class DetectionResult {
         return scoreAsFloat;
     }
 
-    public RectF getBoundingBox() {
-        return scaledBoundingBox;
-    }
 
 
 
