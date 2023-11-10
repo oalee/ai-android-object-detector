@@ -84,8 +84,13 @@ public class DetectedItemsAdapter extends RecyclerView.Adapter<DetectedItemsAdap
 
 
 
-            imageManager.loadImage(detectionResult.getImageName(), detectionResult, imageMetadata, binding.detectedItemImageView);
+            try {
+                imageManager.loadImage(detectionResult.getImageName(), detectionResult, imageMetadata, binding.detectedItemImageView);
 
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
 //            binding.de.setText(String.valueOf(detectionResult.getConfidence()));
         }
     }

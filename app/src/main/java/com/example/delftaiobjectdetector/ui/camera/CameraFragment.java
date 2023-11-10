@@ -44,10 +44,10 @@ public class CameraFragment extends Fragment {
         CameraState state = mViewModel.cameraState.getValue();
         if (state == CameraState.CAPTURED || state == CameraState.SAVE_IMAGE_SUCCESS) {
 
-          mViewModel.restartCamera(this);
+            mViewModel.restartCamera(this);
         }
 //        log state
-        Timber.d( "onResume: " + mViewModel.cameraState.getValue());
+        Timber.d("onResume: " + mViewModel.cameraState.getValue());
 
         binding.overlay.clear();
     }
@@ -74,13 +74,11 @@ public class CameraFragment extends Fragment {
                     if (cameraState == CameraState.STREAMING) {
 
                         binding.previewView.setVisibility(View.VISIBLE);
-                    } else
-                    if (cameraState == CameraState.CAPTURING) {
+                    } else if (cameraState == CameraState.CAPTURING) {
                         animateCapturing();
                     } else if (cameraState == CameraState.RESTARTING) {
                         animateRestarting();
-                    }
-                    else if (cameraState == CameraState.CAPTURED){
+                    } else if (cameraState == CameraState.CAPTURED) {
 //                        mViewModel.unbindCamera();
                         binding.previewView.setVisibility(View.INVISIBLE);
 
@@ -93,11 +91,28 @@ public class CameraFragment extends Fragment {
 
 
                     } else if (cameraState == CameraState.SAVE_IMAGE_SUCCESS) {
-
+//                        binding.captureButton.clearAnimation();
                         String newFileName = mViewModel.savedImageName.getValue();
                         CameraFragmentDirections.ActionCameraFragmentToAnalysisFragment action = CameraFragmentDirections.actionCameraFragmentToAnalysisFragment(newFileName);
                         findNavController(this).navigate(action);
                         mViewModel.onNavigatedToResult();
+                    }else if (cameraState == CameraState.SAVING_IMAGE_RESULT) {
+
+//                        rotate camputreImage to sping animation
+                        binding.captureButton.animate()
+                                .rotationBy(360)
+                                .setInterpolator(new LinearInterpolator())
+                                .setDuration(400) // duration of the fade-out effect
+                                .withEndAction(() -> {
+                                    // Change the image resource after the fade-out
+                                    binding.captureButton.setImageResource(R.drawable.baseline_autorenew_24);
+                                    // Fade in the captureButton with the new image
+                                    binding.captureButton.animate()
+                                            .alpha(1f)
+                                            .setDuration(200)
+                                            .start();
+                                })
+                                .start();
                     }
                 }
         );
@@ -138,7 +153,7 @@ public class CameraFragment extends Fragment {
         binding.galleryButton.setOnClickListener(
                 v -> {
 
-                    findNavController(this).navigate( CameraFragmentDirections.actionCameraFragmentToGalleryFragment());
+                    findNavController(this).navigate(CameraFragmentDirections.actionCameraFragmentToGalleryFragment());
 
                 }
         );
@@ -229,7 +244,6 @@ public class CameraFragment extends Fragment {
                     }
                 })
                 .start();
-
 
 
         binding.capturedImageView.animate()
