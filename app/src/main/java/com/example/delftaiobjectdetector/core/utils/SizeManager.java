@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
+import timber.log.Timber;
 
 @Singleton
 public class SizeManager {
@@ -98,7 +99,7 @@ public class SizeManager {
     public void setCameraHeightBasedOnImageSize(View view, Uri imageUri) {
         Size imageSize = getImageSize(imageUri);
 
-        Log.d("SizeManager", "setCameraHeightBasedOnImageSize: " + imageSize.toString());
+        Timber.d("setCameraHeightBasedOnImageSize: " + imageSize.toString());
 
         float aspectRatio = (float) imageSize.getWidth() / (float) imageSize.getHeight();
         int height = getHeightForWidth(width, aspectRatio);

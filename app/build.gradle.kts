@@ -34,6 +34,7 @@ android {
     buildFeatures {
         viewBinding = true
         mlModelBinding = true
+        buildConfig = true
     }
 
     androidResources {
@@ -62,6 +63,8 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    implementation("com.jakewharton.timber:timber:4.7.1")
 
 //    CameraX
     implementation("androidx.camera:camera-core:${camerax_version}")

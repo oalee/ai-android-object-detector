@@ -38,6 +38,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
+import timber.log.Timber;
 
 @Singleton
 public class MLUtils implements DefaultLifecycleObserver {
@@ -151,7 +152,7 @@ public class MLUtils implements DefaultLifecycleObserver {
         int originalHeight = originalBitmap.getHeight();
 
 //        log this
-        Log.d("MLUtils", "detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
+        Timber.d( "detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
 
         // Calculate the new dimensions
         int newWidth = 448;
@@ -202,7 +203,7 @@ public class MLUtils implements DefaultLifecycleObserver {
             boundingBox.bottom = Math.min(boundingBox.bottom, originalHeight);
 
             // Log the category, score, and bounding box
-            Log.d("MLUtils", String.format("Category: %s, Score: %.2f, Box: [%f, %f, %f, %f]",
+            Timber.d(String.format("Category: %s, Score: %.2f, Box: [%f, %f, %f, %f]",
                     result.getCategoryAsString(),
                     result.getScoreAsFloat(),
                     boundingBox.left,
@@ -280,7 +281,7 @@ public class MLUtils implements DefaultLifecycleObserver {
         }
 
 //        log this
-        Log.d("MLUtils", "detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
+        Timber.d("detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
 
         // Calculate the new dimensions
         int newWidth = 448;
@@ -309,7 +310,7 @@ public class MLUtils implements DefaultLifecycleObserver {
         List<EfficientdetLite2Detection.DetectionResult> results = outputs.getDetectionResultList();
 
 //        for (EfficientdetLite2Detection.DetectionResult result : results) {
-//            Log.d("MLUtils", "detectObjects: " + result.getCategoryAsString() + " " + result.getScoreAsFloat());
+//            Timber.d("detectObjects: " + result.getCategoryAsString() + " " + result.getScoreAsFloat());
 //        }
 
         List<DetectionResult> scaledResults = new ArrayList<>();
@@ -343,7 +344,7 @@ public class MLUtils implements DefaultLifecycleObserver {
             boundingBox.bottom = Math.min(boundingBox.bottom, originalHeight);
 
             // Log the category, score, and bounding box
-            Log.d("MLUtils", String.format("Category: %s, Score: %.2f, Box: [%f, %f, %f, %f]",
+            Timber.d(String.format("Category: %s, Score: %.2f, Box: [%f, %f, %f, %f]",
                     result.getCategoryAsString(),
                     result.getScoreAsFloat(),
                     boundingBox.left,

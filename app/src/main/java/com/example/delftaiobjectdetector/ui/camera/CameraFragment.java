@@ -27,6 +27,7 @@ import java.io.File;
 import java.util.List;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import timber.log.Timber;
 
 @AndroidEntryPoint
 public class CameraFragment extends Fragment {
@@ -46,7 +47,7 @@ public class CameraFragment extends Fragment {
           mViewModel.restartCamera(this);
         }
 //        log state
-        Log.d("CameraFragment", "onResume: " + mViewModel.cameraState.getValue());
+        Timber.d( "onResume: " + mViewModel.cameraState.getValue());
 
         binding.overlay.clear();
     }
@@ -69,7 +70,7 @@ public class CameraFragment extends Fragment {
         mViewModel.cameraState.observe(
                 getViewLifecycleOwner(),
                 cameraState -> {
-                    Log.d("CameraFragment", "onCreateView: " + cameraState);
+                    Timber.d("onCreateView: " + cameraState);
                     if (cameraState == CameraState.STREAMING) {
 
                         binding.previewView.setVisibility(View.VISIBLE);
@@ -114,7 +115,7 @@ public class CameraFragment extends Fragment {
                 rotationDegrees -> {
 //                    binding.capturedImageView.setRotation(rotationDegrees);
 
-                    Log.d("CameraFragment", "onCreateView: " + rotationDegrees);
+                    Timber.d("onCreateView: " + rotationDegrees);
 //                    binding.overlay.setRotation(Math.abs(rotationDegrees-90));
                     binding.overlay.setParentRotation(rotationDegrees);
                 }
@@ -145,7 +146,7 @@ public class CameraFragment extends Fragment {
         binding.captureButton.setOnClickListener(v -> {
 
 //            log state
-            Log.d("CameraFragment", "onClick: " + mViewModel.cameraState.getValue());
+            Timber.d("onClick: " + mViewModel.cameraState.getValue());
 //                only capture when state is streaming
             if (mViewModel.cameraState.getValue() == CameraState.STREAMING) {
 //                    initiate capture

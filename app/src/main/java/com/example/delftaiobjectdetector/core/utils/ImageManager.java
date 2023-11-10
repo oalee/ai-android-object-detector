@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import dagger.hilt.android.qualifiers.ApplicationContext;
+import timber.log.Timber;
 
 @Singleton
 public class ImageManager {
@@ -139,7 +140,7 @@ public class ImageManager {
         }
 
         Uri imageUri = Uri.parse("file://" + context.getFilesDir() + "/" + imageName);
-        Log.d("ImageManager", "loadImage: " + imageUri);
+        Timber.d("loadImage: " + imageUri);
         Bitmap bitmap = getBitmapFromUri(imageUri);
         // No need to scale down or pad the bitmap, as we're cropping from the original
 
@@ -147,7 +148,7 @@ public class ImageManager {
         try {
             ExifInterface exif = new ExifInterface(imageUri.getPath());
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-            Log.d("ImageManager", "loadImage: orientation " + orientation);
+            Timber.d("loadImage: orientation " + orientation);
             Matrix matrix = new Matrix();
             if (orientation == 6) {
                 matrix.postRotate(90);

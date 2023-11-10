@@ -40,6 +40,7 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.lifecycle.HiltViewModel;
 import dagger.hilt.android.qualifiers.ApplicationContext;
+import timber.log.Timber;
 
 @HiltViewModel
 public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener {
@@ -147,7 +148,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
         if (cameraState.getValue() != CameraState.STREAMING) {
             return;
         }
-        Log.d("CameraFragment", "captureImage: ");
+        Timber.d("captureImage: ");
 
         unbindML();
 
@@ -170,7 +171,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                        Log.d("CameraFragment", "onImageSaved: " + file.getAbsolutePath());
+                        Timber.d("onImageSaved: " + file.getAbsolutePath());
 
 //                        Uri savedUri = outputFileResults.getSavedUri(); // Get the Uri of the saved file
 //                        String filePath = savedUri.getPath(); // Convert Uri to file path if needed
@@ -183,7 +184,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 ////                            for orientation 0 save 90
 //
 //                            int degrees = rotationDegrees.getValue();
-//                            Log.d("CameraFragment", "onImageSaved: " + degrees);
+//                            Timber.d("onImageSaved: " + degrees);
 //                            if (degrees == 0) {
 //                                exif.setAttribute(ExifInterface.TAG_ORIENTATION, String.valueOf(ExifInterface.ORIENTATION_ROTATE_90));
 //                                exif.saveAttributes();
@@ -196,7 +197,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 //                            }
 //                            // Set the orientation tag to rotate 90 degrees
 //
-//                            Log.d("CameraFragment", "EXIF metadata updated with portrait orientation.");
+//                            Timber.d("EXIF metadata updated with portrait orientation.");
 //                        } catch (IOException e) {
 //                            Log.e("CameraFragment", "Failed to update EXIF metadata", e);
 //                        }
@@ -209,7 +210,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
                     @Override
                     public void onError(@NonNull ImageCaptureException exception) {
 
-                        Log.d("CameraFragment", "onError: " + exception.getMessage());
+                        Timber.d("onError: " + exception.getMessage());
 
                         mCameraState.postValue(CameraState.ERROR_CAMERA_CAPTURE);
                     }

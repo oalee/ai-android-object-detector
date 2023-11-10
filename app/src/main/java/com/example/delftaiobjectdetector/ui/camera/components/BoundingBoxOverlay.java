@@ -13,6 +13,8 @@ import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 
 import java.util.List;
 
+import timber.log.Timber;
+
 
 public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
     private final Paint paint;
@@ -59,9 +61,9 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
         int originalWidth =  imageMetadata.getWidth();
         int originalHeight = imageMetadata.getHeight();
 
-        Log.d("Draw", "draw: " + originalWidth + " " + originalHeight + " " + canvasWidth + " " + canvasHeight);
+        Timber.d("draw: " + originalWidth + " " + originalHeight + " " + canvasWidth + " " + canvasHeight);
 
-        Log.d("Draw", "draw: " + rotation) ;
+        Timber.d("draw: " + rotation) ;
 
 ////
 //        if (rotation == 0 || rotation == 180){
@@ -120,7 +122,7 @@ public class BoundingBoxOverlay extends GraphicOverlay.Graphic {
                 canvas.drawText(detection.getCategoryAsString() + " " + String.format("%.2f", detection.getScoreAsFloat()),
                         scaledRect.left, scaledRect.top  + 40, textPaint);
 
-//                Log.d("Draw", "draw: " + detection.getCategoryAsString() + " " + String.format("%.2f", detection.getScoreAsFloat()));
+//                Timber.d("draw: " + detection.getCategoryAsString() + " " + String.format("%.2f", detection.getScoreAsFloat()));
             }
 
 
