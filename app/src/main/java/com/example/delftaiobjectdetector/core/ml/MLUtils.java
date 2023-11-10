@@ -302,7 +302,7 @@ public class MLUtils implements DefaultLifecycleObserver {
         TensorImage image = TensorImage.fromBitmap(paddedBitmap);
 
         // Runs model inference and gets result.
-        EfficientdetLite2Detection.Outputs outputs = model.process(
+        EfficientdetLite2Detection.Outputs outputs = getModel().process(
                 image
         );
 

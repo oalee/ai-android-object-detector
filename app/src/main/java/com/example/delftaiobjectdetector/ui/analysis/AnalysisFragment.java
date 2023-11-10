@@ -2,6 +2,7 @@ package com.example.delftaiobjectdetector.ui.analysis;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -10,10 +11,16 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.transition.Transition;
+import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.target.Target;
+import com.example.delftaiobjectdetector.R;
 import com.example.delftaiobjectdetector.databinding.FragmentAnalysisBinding;
 import com.example.delftaiobjectdetector.ui.analysis.components.DetectedItemsAdapter;
 import com.example.delftaiobjectdetector.ui.camera.components.BoundingBoxOverlay;
@@ -33,12 +40,30 @@ public class AnalysisFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-         binding = FragmentAnalysisBinding.inflate(inflater, container, false);
-         mViewModel = new ViewModelProvider(this).get(AnalysisViewModel.class);
 
-//        get arguments from bundle
         AnalysisFragmentArgs args = AnalysisFragmentArgs.fromBundle(getArguments());
         imagePath = args.getImageUri();
+
+        binding = FragmentAnalysisBinding.inflate(inflater, container, false);
+
+
+
+         mViewModel = new ViewModelProvider(this).get(AnalysisViewModel.class);
+//        TransitionInflater sharedElementReturnTransition =  TransitionInflater.from(this.context).inflateTransition(R.transition.change_bounds)
+
+        Transition sharedElementEnterTransition = TransitionInflater.from(requireContext()).inflateTransition(R.transition.transition_set);
+
+        sharedElementEnterTransition.setDuration(400);
+
+
+        setSharedElementEnterTransition(sharedElementEnterTransition);
+
+        postponeEnterTransition();
+//        setSharedElementReturnTransition(sharedElementExitTransition);
+
+//        get arguments from bundle
+        binding.capturedImageView.setTransitionName(imagePath);
+
 
         File newFile = new File(requireContext().getFilesDir(), imagePath);
 
@@ -46,17 +71,27 @@ public class AnalysisFragment extends Fragment {
                 binding.capturedImageView, Uri.fromFile(newFile)
         );
 
+//        load with glide and and load, then start transition
+        Glide.with(this)
+                .load(newFile)
+                .listener(
+                        new com.bumptech.glide.request.RequestListener<android.graphics.drawable.Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, @Nullable Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
+                                return false;
+                            }
 
-//        binding.overlay.setImageSize(
-//                mViewModel.getSizeManager().getImageSize(
-//                        Uri.fromFile(newFile)
-//                )
-//        );
-//
-//        mViewModel.getSizeManager().setCameraHeightBasedOnImageSize(
-//                binding.overlay, Uri.fromFile(newFile)
-//        );
-        binding.capturedImageView.setImageURI(Uri.fromFile(newFile));
+
+                            @Override
+                            public boolean onResourceReady(android.graphics.drawable.Drawable resource, java.lang.Object model, com.bumptech.glide.request.target.Target target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+                                startPostponedEnterTransition();
+                                return false;
+                            }
+                        }
+                )
+                .format(com.bumptech.glide.load.DecodeFormat.PREFER_ARGB_8888)
+                .dontTransform()
+                .into(binding.capturedImageView);
 
 
         mViewModel.loadData(imagePath);

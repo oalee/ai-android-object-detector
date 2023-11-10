@@ -9,9 +9,12 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import android.transition.Transition;
+import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +39,10 @@ public class GalleryFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         FragmentGalleryBinding binding = FragmentGalleryBinding.inflate(inflater, container, false);
+        Transition sharedElementEnterTransition = TransitionInflater.from(requireContext()).inflateTransition(R.transition.transition_set);
+//
+        setReturnTransition(sharedElementEnterTransition);
+//        setEnterTransition(sharedElementEnterTransition);
 
         mViewModel = new ViewModelProvider(this).get(GalleryViewModel.class);
         binding.galleryRecyclerView.setLayoutManager(
@@ -44,16 +51,35 @@ public class GalleryFragment extends Fragment {
         mViewModel.getDetectionResults().observe(getViewLifecycleOwner(), detectionResults -> {
             binding.textView.setVisibility(detectionResults.isEmpty() ? View.VISIBLE : View.GONE);
 
-            binding.galleryRecyclerView.setAdapter(new GalleryAdapter(detectionResults, imagePath -> {
+            binding.galleryRecyclerView.setAdapter(new GalleryAdapter(detectionResults, (imagePath, imageView) -> {
                 GalleryFragmentDirections.ActionGalleryFragmentToAnalysisFragment action =
                         GalleryFragmentDirections.actionGalleryFragmentToAnalysisFragment(imagePath);
 
-                findNavController(this).navigate(action);
+
+                Navigator.Extras extras = new androidx.navigation.fragment.FragmentNavigator.Extras.Builder()
+                        .addSharedElement(imageView, imagePath)
+                        .build();
+
+//                predraw the view
+//                imageView.getViewTreeObserver().addOnPreDrawListener(() -> {
+//                    startPostponedEnterTransition();
+//                    return true;
+//                });
+
+                findNavController(this).navigate(action, extras);
 
             },  mViewModel.getSizeManager()) );
 //            set staggered grid layout manager
 
         });
+
+        postponeEnterTransition();
+        binding.galleryRecyclerView.getViewTreeObserver().addOnPreDrawListener(() -> {
+            startPostponedEnterTransition();
+            return true;
+        });
+
+
 
         return binding.getRoot();
     }

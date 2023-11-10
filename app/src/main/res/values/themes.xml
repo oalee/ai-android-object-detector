@@ -5,5 +5,8 @@
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
     </style>
 
-    <style name="Theme.DelftAIObjectDetector" parent="Base.Theme.DelftAIObjectDetector" />
+    <style name="Theme.DelftAIObjectDetector" parent="Base.Theme.DelftAIObjectDetector" >
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowContentTransitions">true</item>
+    </style>
 </resources>

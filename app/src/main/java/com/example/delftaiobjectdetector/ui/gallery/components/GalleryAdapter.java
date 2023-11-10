@@ -83,22 +83,21 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
                     .into(binding.imageView);
 
 
-//            sizeManager.setViewWidthAndHeight(
-//                    binding.moreImageView, (int) (sizeManager.getWidth() * 0.1f)
-//            );
+
+            binding.imageView.setTransitionName(imageName);
 
 
             binding.getRoot().setOnClickListener(v -> {
-                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
+                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName, binding.imageView);
             });
 //            binding.graphicOverlay.setOnClickListener(v -> {
 //                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
 //            });
             binding.imageView.setOnClickListener(v -> {
-                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
+                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName, binding.imageView);
             });
             binding.moreImageView.setOnClickListener(v -> {
-                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName);
+                onClickToNavigateToAnalysisFragment.onClickToNavigateToAnalysisFragment(imageName, binding.imageView);
             });
 
         }
@@ -106,7 +105,7 @@ public class GalleryAdapter extends RecyclerView.Adapter<GalleryAdapter.ViewHold
 
     }
    public interface OnClickToNavigateToAnalysisFragment {
-        void onClickToNavigateToAnalysisFragment(String imageName);
+        void onClickToNavigateToAnalysisFragment(String imageName, View view);
     }
 
 }
