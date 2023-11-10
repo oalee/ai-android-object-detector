@@ -43,11 +43,8 @@ public class CameraFragment extends Fragment {
 //        if state is not Captured, bind camera
         CameraState state = mViewModel.cameraState.getValue();
         if (state == CameraState.CAPTURED || state == CameraState.SAVE_IMAGE_SUCCESS) {
-
             mViewModel.restartCamera(this);
         }
-//        log state
-        Timber.d("onResume: " + mViewModel.cameraState.getValue());
 
         binding.overlay.clear();
     }
@@ -60,12 +57,7 @@ public class CameraFragment extends Fragment {
 
         mViewModel.bindCamera(this, binding.previewView);
 
-        SizeManager sizeManager = mViewModel.getSizeManager();
-        sizeManager.setCameraHeightPortraitPreview(binding.previewView);
-        sizeManager.setCameraHeightPortraitPreview(binding.capturedImageView);
-        sizeManager.setViewWidthAndHeight(binding.captureButton, (int) (sizeManager.getWidth() * 0.15f));
-        sizeManager.setViewWidthAndHeight(binding.saveButton, (int) (sizeManager.getWidth() * 0.13f));
-        sizeManager.setViewWidthAndHeight(binding.galleryButton, (int) (sizeManager.getWidth() * 0.13f));
+        initView();
 
         mViewModel.cameraState.observe(
                 getViewLifecycleOwner(),
@@ -79,15 +71,10 @@ public class CameraFragment extends Fragment {
                     } else if (cameraState == CameraState.RESTARTING) {
                         animateRestarting();
                     } else if (cameraState == CameraState.CAPTURED) {
-//                        mViewModel.unbindCamera();
+//
                         binding.previewView.setVisibility(View.INVISIBLE);
 
-                        File file = new File(requireContext().getFilesDir(), "temp.jpg");
-//                        Glide.with(requireContext()).load(file).into(binding.capturedImageView);
-                        binding.capturedImageView.setImageURI(null);
-                        binding.capturedImageView.setImageURI(Uri.fromFile(file));
-                        binding.capturedImageView.setVisibility(View.VISIBLE);
-                        binding.capturedImageView.setAlpha(1f);
+                        animateCaptured();
 
 
                     } else if (cameraState == CameraState.SAVE_IMAGE_SUCCESS) {
@@ -96,23 +83,9 @@ public class CameraFragment extends Fragment {
                         CameraFragmentDirections.ActionCameraFragmentToAnalysisFragment action = CameraFragmentDirections.actionCameraFragmentToAnalysisFragment(newFileName);
                         findNavController(this).navigate(action);
                         mViewModel.onNavigatedToResult();
-                    }else if (cameraState == CameraState.SAVING_IMAGE_RESULT) {
+                    } else if (cameraState == CameraState.SAVING_IMAGE_RESULT) {
 
-//                        rotate camputreImage to sping animation
-                        binding.captureButton.animate()
-                                .rotationBy(360)
-                                .setInterpolator(new LinearInterpolator())
-                                .setDuration(400) // duration of the fade-out effect
-                                .withEndAction(() -> {
-                                    // Change the image resource after the fade-out
-                                    binding.captureButton.setImageResource(R.drawable.baseline_autorenew_24);
-                                    // Fade in the captureButton with the new image
-                                    binding.captureButton.animate()
-                                            .alpha(1f)
-                                            .setDuration(200)
-                                            .start();
-                                })
-                                .start();
+                        animateSaving();
                     }
                 }
         );
@@ -185,7 +158,6 @@ public class CameraFragment extends Fragment {
         );
 
 
-
         binding.captureButton.setOnClickListener(v -> {
 
 //            log state
@@ -207,6 +179,43 @@ public class CameraFragment extends Fragment {
 
 
         return binding.getRoot();
+    }
+
+    private void animateSaving() {
+
+//                        rotate camputreImage to sping animation
+        binding.captureButton.animate()
+                .rotationBy(360)
+                .setInterpolator(new LinearInterpolator())
+                .setDuration(400) // duration of the fade-out effect
+                .withEndAction(() -> {
+                    // Change the image resource after the fade-out
+                    binding.captureButton.setImageResource(R.drawable.baseline_autorenew_24);
+                    // Fade in the captureButton with the new image
+                    binding.captureButton.animate()
+                            .alpha(1f)
+                            .setDuration(200)
+                            .start();
+                })
+                .start();
+    }
+
+    private void animateCaptured() {
+        File file = new File(requireContext().getFilesDir(), "temp.jpg");
+//                        Glide.with(requireContext()).load(file).into(binding.capturedImageView);
+        binding.capturedImageView.setImageURI(null);
+        binding.capturedImageView.setImageURI(Uri.fromFile(file));
+        binding.capturedImageView.setVisibility(View.VISIBLE);
+        binding.capturedImageView.setAlpha(1f);
+    }
+
+    private void initView() {
+        SizeManager sizeManager = mViewModel.getSizeManager();
+        sizeManager.setCameraHeightPortraitPreview(binding.previewView);
+        sizeManager.setCameraHeightPortraitPreview(binding.capturedImageView);
+        sizeManager.setViewWidthAndHeight(binding.captureButton, (int) (sizeManager.getWidth() * 0.15f));
+        sizeManager.setViewWidthAndHeight(binding.saveButton, (int) (sizeManager.getWidth() * 0.13f));
+        sizeManager.setViewWidthAndHeight(binding.galleryButton, (int) (sizeManager.getWidth() * 0.13f));
     }
 
     public void animateCapturing() {

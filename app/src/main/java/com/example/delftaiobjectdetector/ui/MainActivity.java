@@ -3,34 +3,25 @@ package com.example.delftaiobjectdetector.ui;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.splashscreen.SplashScreen;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.widget.Toast;
 
 import com.example.delftaiobjectdetector.R;
-import com.example.delftaiobjectdetector.core.ml.MLUtils;
-import com.example.delftaiobjectdetector.core.utils.SharedPrefUtil;
-import com.example.delftaiobjectdetector.ui.home.HomeViewModel;
-
-import java.util.logging.Logger;
-
-import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import timber.log.Timber;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity {
-
 
 
     private MainViewModel viewModel;
@@ -44,60 +35,86 @@ public class MainActivity extends AppCompatActivity {
         SplashScreen.installSplashScreen(this);
 
 
-        viewModel  = new ViewModelProvider(this).get(MainViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
 
 
         setContentView(R.layout.activity_main);
-
-        initActivityResultLauncher();
-
-
-        viewModel.bindToLifecycle(this);
+        handlePermission(); // handle permission
+        viewModel.bindToMLLifecycle(this);
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        handlePermissions();
+
     }
 
-    private void initActivityResultLauncher() {
+    private void handlePermission() {
         if (activityResultLauncher == null) activityResultLauncher = registerForActivityResult(
                 new ActivityResultContracts.RequestPermission(),
                 result -> {
-
                     if (!result) {
-                        viewModel.increasePermissionRequestCount();
-                        showPermissionExplanationDialog();
+
+                        if (viewModel.getPermissionRequestCount() < 1) {
+                            showPermissionExplanationDialog();
+                            viewModel.increasePermissionRequestCount();
+                        }
+
+
                     }
                 }
         );
-    }
-    //
-    private void handlePermissions() {
+
         if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
 //        // Permissions already granted
             return;
         }
 
+//        if less than two
+        if (viewModel.getPermissionRequestCount() < 1) {
+            activityResultLauncher.launch(
 
-        activityResultLauncher.launch(
+                    android.Manifest.permission.CAMERA
 
-                android.Manifest.permission.CAMERA
-
-        );
+            );
+            return;
+        }
 
 
     }
 
 
+
     private void showPermissionExplanationDialog() {
+
+        String title;
+        String message;
+        String negativeMessage = "Enable Permissions";
+
+        DialogInterface.OnClickListener negativeButtonListener;
+
+        int requestCount = 1;
+
+
+        Timber.d("request count: %s", requestCount);
+
+        if (requestCount == 1) {
+            // For the second request
+            title = "Final Request for Camera Permission!!";
+            message = "This is the last time we're asking. To enable real-time object detection, please grant camera permission. If you decline, you'll need to enable it later in the app settings.";
+
+        } else  {
+            // For the first request
+            title = "Camera Permission Required";
+            message = "This app requires camera permission to detect objects in real-time! Grant the permission or browse the app to see the detected objects.";
+        }
+
         new AlertDialog.Builder(this)
-                .setTitle("Permissions Required")
-                .setMessage("This app requires camera permission to function. Please grant the permission.")
-                .setPositiveButton("OK", (dialog, which) -> requestPermissions())
-                .setNegativeButton("Exit", (dialog, which) -> finish())
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("Browse Gallery", (dialog, which) ->  dialog.dismiss())
+                .setNegativeButton("Enable Permissions", (dialog, which) ->  requestPermissions())
                 .create().show();
 
 
@@ -110,25 +127,29 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-//        only for android 11 and above
-        if (viewModel.getPermissionRequestCount() >= 2 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-
-//            go directly to settings
-            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            Uri uri = Uri.fromParts("package", getPackageName(), null);
-            intent.setData(uri);
-
-            Toast.makeText(this, "Please grant camera permission in settings", Toast.LENGTH_SHORT).show();
-            startActivity(intent);
-
-            return;
-        }
+//
         activityResultLauncher.launch(
 
                 android.Manifest.permission.CAMERA
 
         );
 
+
+
+    }
+
+    private void gotToSystemSettingsForPermission() {
+
+        if (viewModel.getPermissionRequestCount() >= 2 && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+
+//            go directly to settings
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            Uri uri = Uri.fromParts("package", getPackageName(), null);
+            intent.setData(uri);
+            startActivity(intent);
+
+            return;
+        }
     }
 
 }

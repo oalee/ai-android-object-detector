@@ -60,36 +60,6 @@ public class GraphicOverlay extends View {
         }
     }
 
-    public int getImageWidth() {
-        return imageWidth;
-    }
-
-    public void setImageWidth(int imageWidth) {
-        this.imageWidth = imageWidth;
-    }
-
-    public int getImageHeight() {
-        return imageHeight;
-    }
-
-    public void setImageHeight(int imageHeight) {
-        this.imageHeight = imageHeight;
-    }
-
-    public void setImageSize(Size imageSize) {
-
-//        if width > height set 640
-
-        if (imageSize.getWidth() > imageSize.getHeight()) {
-            this.imageWidth = 640;
-            this.imageHeight = 480;
-            return;
-        }
-
-//        this.imageWidth = imageSize.getWidth();
-//        this.imageHeight = imageSize.getHeight();
-    }
-
     // Abstract class for creating graphics (bounding boxes, labels, etc.)
     public abstract static class Graphic {
         public GraphicOverlay overlay;

@@ -60,10 +60,10 @@ public class GalleryFragment extends Fragment {
                         .build();
 
 //                predraw the view
-//                imageView.getViewTreeObserver().addOnPreDrawListener(() -> {
-//                    startPostponedEnterTransition();
-//                    return true;
-//                });
+                imageView.getViewTreeObserver().addOnPreDrawListener(() -> {
+                    startPostponedEnterTransition();
+                    return true;
+                });
 
                 findNavController(this).navigate(action, extras);
 

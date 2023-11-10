@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.media.ExifInterface;
-import android.media.Image;
 import android.net.Uri;
 import android.util.Log;
 
@@ -18,19 +17,15 @@ import androidx.camera.core.ImageProxy;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.example.delftaiobjectdetector.core.camera.YuvToRgbConverter;
 import com.example.delftaiobjectdetector.core.data.model.DetectionResult;
 import com.example.delftaiobjectdetector.core.data.model.ImageMetadata;
 import com.example.delftaiobjectdetector.core.utils.BitmapUtils;
 import com.example.delftaiobjectdetector.ml.EfficientdetLite2Detection;
-import com.google.mlkit.vision.common.InputImage;
 
 import org.tensorflow.lite.support.image.TensorImage;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,17 +50,21 @@ public class MLUtils implements DefaultLifecycleObserver {
 
     }
 
+    public boolean ioError() {
+        return model == null;
+    }
+
     private void initModel() {
         try {
             this.model = EfficientdetLite2Detection.newInstance(mContext);
         } catch (IOException e) {
-
+            this.model = null; // set model to null to indicate error
         }
     }
 
     public EfficientdetLite2Detection getModel() {
 
-        if  (model == null) {
+        if (model == null) {
             initModel();
         }
 
@@ -87,6 +86,7 @@ public class MLUtils implements DefaultLifecycleObserver {
     public void bindToLifecycle(LifecycleOwner lifecycleOwner) {
         lifecycleOwner.getLifecycle().addObserver(this);
     }
+
     private Bitmap padBitmapToSize(Bitmap bitmap, int width, int height) {
         Bitmap paddedBitmap = Bitmap.createBitmap(width, height, bitmap.getConfig());
         Canvas canvas = new Canvas(paddedBitmap);
@@ -152,7 +152,7 @@ public class MLUtils implements DefaultLifecycleObserver {
         int originalHeight = originalBitmap.getHeight();
 
 //        log this
-        Timber.d( "detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
+        Timber.d("detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
 
         // Calculate the new dimensions
         int newWidth = 448;
@@ -186,7 +186,6 @@ public class MLUtils implements DefaultLifecycleObserver {
         float offsetY = (448 - scaledHeight) / 2f;
 
 
-
         for (EfficientdetLite2Detection.DetectionResult result : results) {
             RectF boundingBox = result.getLocationAsRectF();
 
@@ -202,14 +201,6 @@ public class MLUtils implements DefaultLifecycleObserver {
             boundingBox.right = Math.min(boundingBox.right, originalWidth);
             boundingBox.bottom = Math.min(boundingBox.bottom, originalHeight);
 
-            // Log the category, score, and bounding box
-            Timber.d(String.format("Category: %s, Score: %.2f, Box: [%f, %f, %f, %f]",
-                    result.getCategoryAsString(),
-                    result.getScoreAsFloat(),
-                    boundingBox.left,
-                    boundingBox.top,
-                    boundingBox.right,
-                    boundingBox.bottom));
 
             // You might need to create a new result object if the DetectionResult class is immutable
             // or otherwise update the bounding box in the existing result object.
@@ -222,7 +213,7 @@ public class MLUtils implements DefaultLifecycleObserver {
 
         }
 
-        ImageMetadata imageMetadata = new ImageMetadata(imageUri.getLastPathSegment(), originalWidth, originalHeight, rotation, scaleFactor,  (int) offsetX, (int) offsetY);
+        ImageMetadata imageMetadata = new ImageMetadata(imageUri.getLastPathSegment(), originalWidth, originalHeight, rotation, scaleFactor, (int) offsetX, (int) offsetY);
 
         if (listener != null) {
             listener.onMLTaskCompleted(scaledResults, imageMetadata);
@@ -231,44 +222,14 @@ public class MLUtils implements DefaultLifecycleObserver {
     }
 
 
-    @OptIn(markerClass = ExperimentalGetImage.class) public void detectObjects(ImageProxy srcImage, MLTaskListener listener) {
+    @OptIn(markerClass = ExperimentalGetImage.class)
+    public void detectObjects(ImageProxy srcImage, MLTaskListener listener) {
 
-
-//        YuvToRgbConverter converter = new YuvToRgbConverter(mContext);
-//        Bitmap originalBitmap = Bitmap.createBitmap(
-//                srcImage.getWidth(),
-//                srcImage.getHeight(),
-//                Bitmap.Config.ARGB_8888
-//        );
-//
-//        converter.yuvToRgb(srcImage.getMediaImage(), originalBitmap);
         Bitmap originalBitmap = BitmapUtils.getBitmap(srcImage);
 
 //           rotate image
         int rotation = srcImage.getImageInfo().getRotationDegrees();
 
-//        originalBitmap = rotateImage(originalBitmap, rotation);
-//
-//        switch (rotation) {
-//
-//
-//
-//            case 90:
-//                originalBitmap = rotateImage(originalBitmap, 0);
-//                break;
-//
-//            case 180:
-//                originalBitmap = rotateImage(originalBitmap, 180);
-//                break;
-//
-//            case 270:
-//                originalBitmap = rotateImage(originalBitmap, 270);
-//                break;
-//
-//            case ExifInterface.ORIENTATION_NORMAL:
-//            default:
-//                originalBitmap = originalBitmap;
-//        }
         // Store the original dimensions
         int originalWidth = originalBitmap.getWidth();
         int originalHeight = originalBitmap.getHeight();
@@ -280,15 +241,12 @@ public class MLUtils implements DefaultLifecycleObserver {
             originalHeight = originalBitmap.getWidth();
         }
 
-//        log this
-        Timber.d("detectObjects: Original Image Size " + originalWidth + " " + originalHeight);
-
-        // Calculate the new dimensions
-        int newWidth = 448;
-        int newHeight = 448;
+        // Model input size
+        int modelInputImageWidth = 448;
+        int modelInputImageHeight = 448;
 
         // Calculate the scaling factor to maintain the aspect ratio
-        float scaleFactor = Math.max((float) originalWidth / newWidth, (float) originalHeight / newHeight);
+        float scaleFactor = Math.max((float) originalWidth / modelInputImageWidth, (float) originalHeight / modelInputImageHeight);
         int scaledWidth = (int) (originalWidth / scaleFactor);
         int scaledHeight = (int) (originalHeight / scaleFactor);
 
@@ -309,24 +267,11 @@ public class MLUtils implements DefaultLifecycleObserver {
 
         List<EfficientdetLite2Detection.DetectionResult> results = outputs.getDetectionResultList();
 
-//        for (EfficientdetLite2Detection.DetectionResult result : results) {
-//            Timber.d("detectObjects: " + result.getCategoryAsString() + " " + result.getScoreAsFloat());
-//        }
 
         List<DetectionResult> scaledResults = new ArrayList<>();
         float offsetX = (448 - scaledWidth) / 2f;
         float offsetY = (448 - scaledHeight) / 2f;
 
-        Log.d(
-                "MLUtils",
-                String.format(
-                        "Scaled Image Size: %d x %d, Offset: %f x %f",
-                        scaledWidth,
-                        scaledHeight,
-                        offsetX,
-                        offsetY
-                )
-        );
 
         for (EfficientdetLite2Detection.DetectionResult result : results) {
             RectF boundingBox = result.getLocationAsRectF();
@@ -343,14 +288,6 @@ public class MLUtils implements DefaultLifecycleObserver {
             boundingBox.right = Math.min(boundingBox.right, originalWidth);
             boundingBox.bottom = Math.min(boundingBox.bottom, originalHeight);
 
-            // Log the category, score, and bounding box
-            Timber.d(String.format("Category: %s, Score: %.2f, Box: [%f, %f, %f, %f]",
-                    result.getCategoryAsString(),
-                    result.getScoreAsFloat(),
-                    boundingBox.left,
-                    boundingBox.top,
-                    boundingBox.right,
-                    boundingBox.bottom));
 
             // You might need to create a new result object if the DetectionResult class is immutable
             // or otherwise update the bounding box in the existing result object.
@@ -363,17 +300,12 @@ public class MLUtils implements DefaultLifecycleObserver {
 
         }
 
-        ImageMetadata imageMetadata = new ImageMetadata("image_name", originalWidth, originalHeight, rotation, scaleFactor,  (int) offsetX, (int) offsetY);
+        ImageMetadata imageMetadata = new ImageMetadata("image_name", originalWidth, originalHeight, rotation, scaleFactor, (int) offsetX, (int) offsetY);
 
         if (listener != null) {
             listener.onMLTaskCompleted(scaledResults, imageMetadata);
         }
 
-//        this.model.close();
-    }
-
-    public boolean isModelLoaded() {
-        return model != null;
     }
 
 

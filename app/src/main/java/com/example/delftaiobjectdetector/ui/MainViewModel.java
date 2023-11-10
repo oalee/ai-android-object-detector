@@ -12,6 +12,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel;
 @HiltViewModel
 public class MainViewModel extends ViewModel {
 
+//    livedata errors (camera and permission)
 
     MLUtils mlUtils;
     SharedPrefUtil sharedPrefUtil;
@@ -34,9 +35,10 @@ public class MainViewModel extends ViewModel {
         return sharedPrefUtil.getPermissionRequestCount();
     }
 
-    public void bindToLifecycle(MainActivity mainActivity) {
+    public void bindToMLLifecycle(MainActivity mainActivity) {
         mlUtils.bindToLifecycle(mainActivity);
     }
+
 
 
 }

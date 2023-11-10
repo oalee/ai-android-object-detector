@@ -20,7 +20,7 @@ public class DatabaseModule {
     @Provides
     public static AppDatabase provideAppDatabase(
             @ApplicationContext Context context
-            ) {
+    ) {
         return Room.databaseBuilder(
                 context,
                 AppDatabase.class,

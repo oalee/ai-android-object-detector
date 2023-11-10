@@ -46,8 +46,7 @@ import timber.log.Timber;
 public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener {
 
     private MutableLiveData<List<DetectionResult>> mDetectionResults = new MutableLiveData<>();
-    public
-    LiveData<List<DetectionResult>> detectionResults = mDetectionResults;
+    public LiveData<List<DetectionResult>> detectionResults = mDetectionResults;
 
     private MutableLiveData<CameraState> mCameraState = new MutableLiveData<>(CameraState.STREAMING);
 
@@ -65,9 +64,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 
     public LiveData<ImageMetadata> imageMetadata = mImageMetadata;
 
-//    should gallery be enabled live data
     private MutableLiveData<Boolean> mShouldGalleryBeEnabled = new MutableLiveData<>();
-
     public LiveData<Boolean> shouldGalleryBeEnabled = mShouldGalleryBeEnabled;
 
 
@@ -328,7 +325,7 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
             boolean success = file.renameTo(newFile);
 //            List<DetectionResult> result = detectionResults.getValue();
 
-            if ( !success) {
+            if (!success) {
                 mCameraState.postValue(CameraState.ERROR_SAVE_IMAGE);
                 return;
             }
@@ -336,15 +333,15 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
 
 
             mlUtils.detectObjects(Uri.fromFile(
-                    newFile
-            ),
-            new MLUtils.MLTaskListener() {
+                            newFile
+                    ),
+                    new MLUtils.MLTaskListener() {
                         @Override
-                        public void onMLTaskCompleted(List<DetectionResult> results, ImageMetadata imageMetadata ) {
+                        public void onMLTaskCompleted(List<DetectionResult> results, ImageMetadata imageMetadata) {
                             mShouldGalleryBeEnabled.postValue(true);
                             mImageMetadata.postValue(imageMetadata);
                             mDetectionResults.postValue(results);
-                            appRepository.insertResults(results, newFileName,  imageMetadata);
+                            appRepository.insertResults(results, newFileName, imageMetadata);
                             mCameraState.postValue(CameraState.SAVE_IMAGE_SUCCESS);
 
 
@@ -354,8 +351,8 @@ public class CameraViewModel extends ViewModel implements MLUtils.MLTaskListener
                         public void onMLTaskFailed() {
 
                         }
-            }
-                    );
+                    }
+            );
 
 
         });
