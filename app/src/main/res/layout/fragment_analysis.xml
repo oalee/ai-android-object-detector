@@ -1,20 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/scrollView"
+    tools:context=".ui.analysis.AnalysisFragment"
 
     >
 
 
-
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".ui.analysis.AnalysisFragment">
+
+       >
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+
+            >
 
         <ImageView
             android:id="@+id/capturedImageView"
@@ -35,14 +43,10 @@
             app:layout_constraintEnd_toEndOf="@id/capturedImageView"
             app:layout_constraintStart_toStartOf="@id/capturedImageView"
             app:layout_constraintTop_toTopOf="@id/capturedImageView" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/capturedImageView"
-            android:descendantFocusability="blocksDescendants">
+
+
 
 
 
@@ -50,17 +54,16 @@
             android:id="@+id/analysisRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-             android:minHeight="400dp"
-            android:nestedScrollingEnabled="false"
+            android:minHeight="400dp"
 
-
-
+            android:visibility="gone"
 
             />
-        </RelativeLayout>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 
-</ScrollView>
+    </LinearLayout>
+
+
+
+</androidx.core.widget.NestedScrollView>

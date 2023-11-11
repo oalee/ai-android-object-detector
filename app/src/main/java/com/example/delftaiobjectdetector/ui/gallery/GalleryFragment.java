@@ -54,7 +54,6 @@ public class GalleryFragment extends Fragment {
                 GalleryFragmentDirections.ActionGalleryFragmentToAnalysisFragment action =
                         GalleryFragmentDirections.actionGalleryFragmentToAnalysisFragment(imagePath);
 
-
                 Navigator.Extras extras = new androidx.navigation.fragment.FragmentNavigator.Extras.Builder()
                         .addSharedElement(imageView, imagePath)
                         .build();
