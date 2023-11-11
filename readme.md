@@ -20,27 +20,10 @@ Alternatively, you can import the project into Android Studio and build it from 
 
 Alternatively, you can run the app from Android Studio.
 
-### Built With
-
-Following are the key frameworks and libraries that were used to build the app, and are selected as per best practices and guidelines from Google and the Android community, and to ensure the app's performance, scalability, and maintainability.
-
-- [ModelViewViewModel (MVVM)](https://developer.android.com/jetpack/guide) For data observation, lifecycle management, and UI-data binding.
-  - [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) To observe changes in the data and update the UI accordingly
-  - [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) To store and manage UI-related data in a lifecycle conscious way
-  - [Data Binding](https://developer.android.com/topic/libraries/data-binding) To bind UI components in layouts to data sources
-- [TensorFlow Lite](https://www.tensorflow.org/lite) 
-  - [Object Detection API](https://www.tensorflow.org/lite/models/object_detection/overview) To detect objects in real time
-- [Hilt Dependency Injection](https://developer.android.com/training/dependency-injection/hilt-android) For managing dependencies, improving testability, and reducing boilerplate code and improve developer experience
-- [CameraX](https://developer.android.com/training/camerax) To access the camera and preview the camera feed
-- [Navigation Component](https://developer.android.com/guide/navigation) For managing fragment-based navigation.
-- [RoomDB Persistence Library](https://developer.android.com/training/data-storage/room) For local data storage and retrieval.
-- [Glide Image Loading Library](https://github.com/bumptech/glide) For efficient image loading.
-- [ConstraintLayout](https://developer.android.com/training/constraint-layout) For responsive UI design.
-
 
 ## Architecture Design
 
-The app follows the MVVM architecture, enhancing maintainability, scalability, and testability. It consists of a UI Layer, a ViewModel Layer, and a Business Logic Layer.
+The app adopts the Model-View-ViewModel (MVVM) architecture, enhancing maintainability, scalability, and testability. This design facilitates a clean separation of concerns and promotes a more structured and intuitive development process.
 
 ![MVVM Architecture](https://developer.android.com/topic/libraries/architecture/images/final-architecture.png)
 
@@ -58,7 +41,25 @@ The app was was designed to be simple and intuitive to use. The app consists of 
 - Gallery screen: Displays a list of images taken by the user, and allows the user to navigate to the image details screen
 - Image details screen: Displays the image and detected objects
 
-### Module Design
+### Built With
+
+Following are the key frameworks and libraries that were used to build the app, and are selected as per best practices and guidelines from Google and the Android community, and to ensure the app's performance, scalability, and maintainability.
+
+- [ModelViewViewModel (MVVM)](https://developer.android.com/jetpack/guide) For data observation, lifecycle management, and UI-data binding.
+  - [LiveData](https://developer.android.com/topic/libraries/architecture/livedata) To observe changes in the data and update the UI accordingly
+  - [ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) To store and manage UI-related data in a lifecycle conscious way
+  - [Data Binding](https://developer.android.com/topic/libraries/data-binding) To bind UI components in layouts to data sources
+- [TensorFlow Lite](https://www.tensorflow.org/lite)
+  - [Object Detection API](https://www.tensorflow.org/lite/models/object_detection/overview) To detect objects in real time
+- [Hilt Dependency Injection](https://developer.android.com/training/dependency-injection/hilt-android) For managing dependencies, improving testability, and reducing boilerplate code and improve developer experience
+- [CameraX](https://developer.android.com/training/camerax) To access the camera and preview the camera feed
+- [Navigation Component](https://developer.android.com/guide/navigation) For managing fragment-based navigation.
+- [RoomDB Persistence Library](https://developer.android.com/training/data-storage/room) For local data storage and retrieval.
+- [Glide Image Loading Library](https://github.com/bumptech/glide) For efficient image loading.
+- [ConstraintLayout](https://developer.android.com/training/constraint-layout) For responsive UI design.
+
+
+### Code Organization
 The app's source code is organized into distinct modules, each focusing on a specific aspect of the app's functionality:
 
 - `core`: Contains the core classes and interfaces that are shared across the app
@@ -76,13 +77,14 @@ The app's source code is organized into distinct modules, each focusing on a spe
   - `gallery`: Contains the classes that are related to the gallery screen
   - `analysis`: Contains the classes that are related to the image details screen and detected objects analysis
 
-### Class Design 
+#### Implementation Details
 The app follows these high-level design principles:
 - ViewModel and LiveData:
   - The ViewModel defines LiveData objects that are observed by the UI. This ensures a reactive user interface that updates in response to data changes.
   - LiveData objects are generally exposed as immutable data, meaning only the ViewModel can set their values. This maintains data integrity and security.
   - The UI layer observes these LiveData objects and updates the interface accordingly.
 - User Interaction Handling:
+  - UI layer observes LiveData objects exposed by the ViewModel and updates the interface accordingly. 
   - The UI layer notifies the ViewModel of user interactions.
   - The ViewModel handles these interactions, processing them according to the app's business logic.
   - This design keeps the UI layer simple and focused solely on user interaction and display.
