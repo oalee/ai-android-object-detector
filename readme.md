@@ -4,6 +4,10 @@
 
 This Android app leverages the TensorFlow Object Detection API and a pre-trained EfficientDet-Lite2 model for real-time object detection. It's designed for devices running Android 9 and above, providing an intuitive and efficient user experience.
 
+### Demo
+https://github.com/oalee/ai-android-object-detector/assets/14542859/6d7a19ec-d81a-4ad8-bb14-5385f1ec179a
+
+
 ### Requirements
 - JDK 17
 - Android SDK 34 
