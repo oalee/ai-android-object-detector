@@ -16,6 +16,7 @@ import android.transition.TransitionInflater;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.GlideException;
@@ -54,12 +55,12 @@ public class AnalysisFragment extends Fragment {
         Transition sharedElementEnterTransition = TransitionInflater.from(requireContext()).inflateTransition(R.transition.transition_set);
 
         sharedElementEnterTransition.setDuration(400);
-
-
         setSharedElementEnterTransition(sharedElementEnterTransition);
-
         postponeEnterTransition();
-//        setSharedElementReturnTransition(sharedElementExitTransition);
+
+
+
+
 
 //        get arguments from bundle
         binding.capturedImageView.setTransitionName(imagePath);
@@ -67,9 +68,9 @@ public class AnalysisFragment extends Fragment {
 
         File newFile = new File(requireContext().getFilesDir(), imagePath);
 
-        mViewModel.getSizeManager().setCameraHeightBasedOnImageSize(
-                binding.capturedImageView, Uri.fromFile(newFile)
-        );
+//        mViewModel.getSizeManager().setCameraHeightBasedOnImageSize(
+//                binding.capturedImageView, Uri.fromFile(newFile)
+//        );
 
 //        load with glide and and load, then start transition
         Glide.with(this)
@@ -84,7 +85,18 @@ public class AnalysisFragment extends Fragment {
 
                             @Override
                             public boolean onResourceReady(android.graphics.drawable.Drawable resource, java.lang.Object model, com.bumptech.glide.request.target.Target target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
+
                                 startPostponedEnterTransition();
+//                                      binding.scrollView.getViewTreeObserver().addOnPreDrawListener(
+//                new ViewTreeObserver.OnPreDrawListener() {
+//                    @Override
+//                    public boolean onPreDraw() {
+//                        binding.scrollView.getViewTreeObserver().removeOnPreDrawListener(this);
+//                        startPostponedEnterTransition();
+//                        return true;
+//                    }
+//                }
+//        );
                                 return false;
                             }
                         }
@@ -110,6 +122,8 @@ public class AnalysisFragment extends Fragment {
                     binding.overlay.add(overlay);
                 }
         );
+
+
 
 
         return binding.getRoot();

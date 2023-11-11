@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:id="@+id/scrollView"
+
+    >
+
+
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         tools:context=".ui.analysis.AnalysisFragment">
 
         <ImageView
@@ -31,15 +36,31 @@
             app:layout_constraintStart_toStartOf="@id/capturedImageView"
             app:layout_constraintTop_toTopOf="@id/capturedImageView" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/analysisRecyclerView"
-            android:layout_width="0dp"
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="50dp"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/capturedImageView" />
+            app:layout_constraintTop_toBottomOf="@id/capturedImageView"
+            android:descendantFocusability="blocksDescendants">
+
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/analysisRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+             android:minHeight="400dp"
+            android:nestedScrollingEnabled="false"
+
+
+
+
+            />
+        </RelativeLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.core.widget.NestedScrollView>
+
+
+</ScrollView>
