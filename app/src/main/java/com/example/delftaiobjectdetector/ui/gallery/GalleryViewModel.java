@@ -48,13 +48,19 @@ public class GalleryViewModel extends ViewModel {
 //        for each image
                     List<List<DetectionResult>> groupedData = new ArrayList<>(allData.stream()
                             .collect(Collectors.groupingBy(DetectionResult::getImageName))
+
+
                             .values());
-//                    reverse the list
-                    groupedData = groupedData.stream().map(list -> {
-                        List<DetectionResult> reversedList = new ArrayList<>(list);
-                        java.util.Collections.reverse(reversedList);
-                        return reversedList;
-                    }).collect(Collectors.toList());
+
+//                    sort list by parsed date( detectionResult.parseDate) in descending order (whole list not each sublist)
+                    groupedData.sort((o1, o2) -> {
+                        DetectionResult detectionResult1 = o1.get(0);
+                        DetectionResult detectionResult2 = o2.get(0);
+                        long firstDate = detectionResult1.parseImageCreationTime();
+                        long secondDate = detectionResult2.parseImageCreationTime();
+
+                        return Long.compare(secondDate, firstDate);
+                    });
 
                     detectionResults.postValue(groupedData);
                 }

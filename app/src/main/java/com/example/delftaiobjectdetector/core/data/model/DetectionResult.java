@@ -7,6 +7,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import timber.log.Timber;
+
 
 @Entity(tableName = "detections")
 public class DetectionResult {
@@ -59,6 +61,11 @@ public class DetectionResult {
 
     public String getImageName() {
         return imageName;
+    }
+
+    public long parseImageCreationTime() {
+
+        return Long.parseLong(imageName.split("\\.")[0]);
     }
 
     public void setScoreAsFloat(float scoreAsFloat) {

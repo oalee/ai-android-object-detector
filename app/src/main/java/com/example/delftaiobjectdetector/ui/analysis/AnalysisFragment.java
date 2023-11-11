@@ -83,6 +83,11 @@ public class AnalysisFragment extends Fragment {
                             public boolean onResourceReady(android.graphics.drawable.Drawable resource, java.lang.Object model, com.bumptech.glide.request.target.Target target, com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
 
                                 startPostponedEnterTransition();
+                                binding.overlay.postDelayed(
+                                        () -> {
+                                            binding.overlay.setVisibility(View.VISIBLE);
+                                        }, 50
+                                );
 
 //                                with delay, set recylerView to be visible after delay
 
@@ -114,7 +119,7 @@ public class AnalysisFragment extends Fragment {
         mViewModel.loadData(imagePath);
         LinearLayoutManager layoutManager = new LinearLayoutManager(requireContext());
         binding.analysisRecyclerView.setLayoutManager(layoutManager);
-
+        binding.overlay.setVisibility(View.GONE);
         mViewModel.getCombinedImageMetadataMutableLiveData().observe(
                 getViewLifecycleOwner(), combinedImageMetadata -> {
                     if (combinedImageMetadata == null) {
@@ -130,6 +135,7 @@ public class AnalysisFragment extends Fragment {
 
 
         if (args.getAnimateTransition() == false) {
+            binding.overlay.setVisibility(View.VISIBLE);
             binding.analysisRecyclerView.setAlpha(0f);
             binding.analysisRecyclerView.setVisibility(View.VISIBLE);
 

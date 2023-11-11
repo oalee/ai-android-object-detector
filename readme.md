@@ -92,3 +92,9 @@ The app follows these high-level design principles:
   - Dependencies such as AppRepository and CameraHelper are injected into the ViewModel using Hilt.
   - This setup allows efficient handling and transformation of data between the UI and the data source.
 
+
+#### Testing
+
+The app was tested on two android devices:
+- Pixel 7 Pro (Android 14)
+- Nokia X71 (Android 9)
